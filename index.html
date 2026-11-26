@@ -1,1795 +1,2104 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>TRIPIC · 트립픽</title>
-<style>
-  :root {
-    --bg: #F8F7F3;
-    --card: #FFFFFF;
-    --green: #315C4C;
-    --green-dark: #234438;
-    --emerald: #00B86B;
-    --sage: #E7EEE8;
-    --sage-dark: #D3E0D6;
-    --text: #1E2421;
-    --muted: #6C7771;
-    --border: #E3E6E1;
-    --danger: #D9383A;
-    --shadow: 0 6px 20px rgba(49, 92, 76, 0.07);
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  html, body {
-    width: 100%;
-    overflow-x: hidden;
-  }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
-    background: #ECEBE4;
-    color: var(--text);
-    display: flex;
-    justify-content: center;
-    min-height: 100vh;
-  }
-  .app-shell {
-    width: 100%;
-    max-width: 440px;
-    background: var(--bg);
-    min-height: 100vh;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 0 36px rgba(0,0,0,0.08);
-    overflow-x: hidden;
-  }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>TRIPIC | 트립픽 - 감성 여행 일정 & 실시간 동행 플래너</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-cream: #F8F7F3;
+      --bg-card: #FFFFFF;
+      --primary-green: #315C4C;
+      --primary-green-dark: #234438;
+      --sage-light: #E7EEE8;
+      --sage-mid: #D2E0D5;
+      --text-main: #1F2A24;
+      --text-sub: #66756D;
+      --border-soft: #E3E6DF;
+      --danger: #D94E4E;
+      --shadow-sm: 0 2px 10px rgba(31, 42, 36, 0.05);
+      --shadow-md: 0 8px 24px rgba(31, 42, 36, 0.08);
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+    }
 
-  /* Splash Screen */
-  #splash {
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    background: var(--bg);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    transition: opacity 0.65s ease, visibility 0.65s ease;
-  }
-  #splash.hide { opacity: 0; visibility: hidden; pointer-events: none; }
-  .splash-svg { width: 290px; max-width: 78vw; height: auto; overflow: visible; }
-  .sp-pin-start {
-    opacity: 0;
-    transform-origin: 48px 54px;
-    animation: popIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
-  }
-  .sp-word {
-    opacity: 0;
-    animation: fadeSlide 0.55s ease 0.35s forwards;
-  }
-  .sp-route {
-    stroke-dasharray: 280;
-    stroke-dashoffset: 280;
-    animation: drawLine 0.85s ease-out 0.65s forwards;
-  }
-  .sp-arrow {
-    opacity: 0;
-    animation: popIn 0.3s ease 1.35s forwards;
-  }
-  .sp-pin-end {
-    opacity: 0;
-    transform-origin: 272px 96px;
-    animation: popIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) 1.45s forwards;
-  }
-  .sp-sub {
-    margin-top: 14px;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--green);
-    letter-spacing: 0.04em;
-    opacity: 0;
-    animation: fadeSlide 0.5s ease 1.1s forwards;
-  }
-  @keyframes popIn {
-    0% { opacity: 0; transform: scale(0.4) translateY(8px); }
-    100% { opacity: 1; transform: scale(1) translateY(0); }
-  }
-  @keyframes fadeSlide {
-    0% { opacity: 0; transform: translateY(6px); }
-    100% { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes drawLine {
-    to { stroke-dashoffset: 0; }
-  }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-  /* Header */
-  header {
-    position: sticky;
-    top: 0;
-    z-index: 40;
-    background: rgba(248, 247, 243, 0.94);
-    backdrop-filter: blur(10px);
-    padding: 13px 18px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid var(--border);
-  }
-  .brand { display: flex; align-items: center; gap: 8px; cursor: pointer; }
-  .brand-title {
-    font-weight: 900;
-    font-size: 20px;
-    letter-spacing: -0.03em;
-    background: linear-gradient(90deg, #1E4D3B 0%, #00B86B 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  .brand-badge {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--green);
-    background: var(--sage);
-    padding: 3px 8px;
-    border-radius: 99px;
-  }
-  .header-actions { display: flex; align-items: center; gap: 8px; }
-  .icon-btn {
-    width: 34px;
-    height: 34px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    background: var(--card);
-    color: var(--green);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 15px;
-  }
-  .user-pill {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--green);
-    background: var(--sage);
-    padding: 6px 11px;
-    border-radius: 99px;
-    cursor: pointer;
-  }
+    body {
+      font-family: 'Noto Sans KR', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #EFECE6;
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
 
-  /* Main Container */
-  main { flex: 1; padding: 16px 16px 96px; min-width: 0; }
-  .tab-panel { display: none; min-width: 0; }
-  .tab-panel.active { display: block; animation: fadeIn 0.22s ease; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    .app-shell {
+      width: 100%;
+      max-width: 480px;
+      min-height: 100vh;
+      background-color: var(--bg-cream);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.07);
+      overflow-x: hidden;
+    }
 
-  /* Cards & Buttons */
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    padding: 18px;
-    box-shadow: var(--shadow);
-    margin-bottom: 14px;
-    min-width: 0;
-  }
-  .btn {
-    width: 100%;
-    border: none;
-    border-radius: 14px;
-    padding: 14px 16px;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: transform 0.12s ease, background 0.15s ease;
-  }
-  .btn:active { transform: scale(0.985); }
-  .btn-primary { background: var(--green); color: #fff; }
-  .btn-primary:hover { background: var(--green-dark); }
-  .btn-sage { background: var(--sage); color: var(--green); }
-  .btn-outline { background: #fff; color: var(--green); border: 1.5px solid var(--green); }
-  .btn-danger { background: #FDECEC; color: var(--danger); }
-  .btn-sm { padding: 8px 12px; font-size: 13px; border-radius: 10px; width: auto; }
+    /* Splash Screen */
+    .splash-screen {
+      position: fixed;
+      inset: 0;
+      max-width: 480px;
+      margin: 0 auto;
+      background: linear-gradient(165deg, #315C4C 0%, #234438 100%);
+      color: #F8F7F3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      transition: opacity 0.45s ease, visibility 0.45s ease;
+    }
+    .splash-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .splash-logo {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 38px;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      margin-bottom: 10px;
+    }
+    .splash-sub {
+      font-size: 13px;
+      color: #D2E0D5;
+      letter-spacing: 0.04em;
+    }
 
-  /* Empty State */
-  .empty-box {
-    text-align: center;
-    padding: 34px 20px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 22px;
-    box-shadow: var(--shadow);
-    margin-top: 10px;
-  }
-  .empty-icon {
-    width: 64px;
-    height: 64px;
-    border-radius: 20px;
-    background: var(--sage);
-    color: var(--green);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 16px;
-  }
-  .empty-title { font-size: 19px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
-  .empty-desc { font-size: 13.5px; color: var(--muted); line-height: 1.55; margin-bottom: 22px; }
-  .empty-btns { display: flex; flex-direction: column; gap: 10px; }
+    /* Top Header */
+    .top-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(248, 247, 243, 0.92);
+      backdrop-filter: blur(10px);
+      padding: 16px 20px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .brand-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--primary-green);
+      letter-spacing: 0.06em;
+    }
+    .brand-badge {
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--sage-light);
+      color: var(--primary-green);
+      padding: 3px 8px;
+      border-radius: 999px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .user-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-soft);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-main);
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+    }
+    .user-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--primary-green);
+    }
+    .bell-btn {
+      position: relative;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--bg-card);
+      border: 1px solid var(--border-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--primary-green);
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.15s ease;
+    }
+    .bell-btn:active {
+      transform: scale(0.94);
+    }
+    .bell-badge {
+      position: absolute;
+      top: -3px;
+      right: -3px;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      border-radius: 999px;
+      background: var(--danger);
+      color: #FFFFFF;
+      font-size: 10px;
+      font-weight: 700;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--bg-cream);
+    }
+    .bell-badge.visible {
+      display: flex;
+    }
 
-  /* Trip Switcher Bar */
-  .switcher-wrap { margin-bottom: 12px; }
-  .switcher-label {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--muted);
-    margin-bottom: 7px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .trip-chips {
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    padding-bottom: 4px;
-    scrollbar-width: none;
-  }
-  .trip-chips::-webkit-scrollbar { display: none; }
-  .trip-chip {
-    flex-shrink: 0;
-    padding: 8px 14px;
-    border-radius: 99px;
-    font-size: 13px;
-    font-weight: 700;
-    border: 1px solid var(--border);
-    background: #fff;
-    color: var(--muted);
-    cursor: pointer;
-  }
-  .trip-chip.active {
-    background: var(--green);
-    color: #fff;
-    border-color: var(--green);
-  }
+    /* Invite Slide Banner */
+    .invite-toast-banner {
+      display: none;
+      margin: 12px 16px 0;
+      background: var(--primary-green);
+      color: #F8F7F3;
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      animation: slideDown 0.25s ease;
+    }
+    .invite-toast-banner.visible {
+      display: flex;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .invite-toast-text {
+      font-size: 12.5px;
+      line-height: 1.4;
+    }
+    .invite-toast-actions {
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+    }
 
-  /* Route Header & Controls */
-  .route-banner {
-    background: linear-gradient(135deg, #315C4C 0%, #24483B 100%);
-    color: #fff;
-    border-radius: 20px;
-    padding: 18px;
-    margin-bottom: 14px;
-  }
-  .route-banner-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
-  .route-city { font-size: 12px; font-weight: 700; opacity: 0.85; margin-bottom: 4px; }
-  .route-name { font-size: 20px; font-weight: 800; line-height: 1.25; }
-  .route-dates { font-size: 12.5px; opacity: 0.85; margin-top: 6px; }
-  .collab-bar {
-    margin-top: 14px;
-    padding-top: 12px;
-    border-top: 1px solid rgba(255,255,255,0.16);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
-  }
-  .member-avatars { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-  .member-tag {
-    background: rgba(255,255,255,0.16);
-    padding: 4px 10px;
-    border-radius: 99px;
-    font-size: 12px;
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-  }
-  .invite-mini-btn {
-    background: #fff;
-    color: var(--green);
-    border: none;
-    border-radius: 99px;
-    padding: 6px 12px;
-    font-size: 12px;
-    font-weight: 800;
-    cursor: pointer;
-    flex-shrink: 0;
-  }
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      padding: 16px 18px 96px;
+    }
+    .tab-view {
+      display: none;
+    }
+    .tab-view.active {
+      display: block;
+    }
 
-  /* Day Tabs & View Toggle */
-  .toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 12px;
-  }
-  .day-tabs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
-  .day-tabs::-webkit-scrollbar { display: none; }
-  .day-tab {
-    padding: 7px 13px;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 700;
-    border: 1px solid var(--border);
-    background: #fff;
-    color: var(--muted);
-    cursor: pointer;
-    flex-shrink: 0;
-  }
-  .day-tab.active { background: var(--sage); color: var(--green); border-color: var(--green); }
-  .view-toggle {
-    display: flex;
-    background: var(--sage);
-    padding: 3px;
-    border-radius: 10px;
-    flex-shrink: 0;
-  }
-  .view-btn {
-    border: none;
-    background: transparent;
-    padding: 5px 10px;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--green);
-    cursor: pointer;
-  }
-  .view-btn.active { background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+    /* Cards & Typography */
+    .section-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow-sm);
+    }
+    .card-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .card-sub {
+      font-size: 12.5px;
+      color: var(--text-sub);
+      margin-top: 2px;
+    }
 
-  /* Timeline Items */
-  .hint-bar {
-    font-size: 12px;
-    color: var(--muted);
-    background: var(--sage);
-    padding: 8px 12px;
-    border-radius: 10px;
-    margin-bottom: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .stop-card {
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 14px;
-    margin-bottom: 10px;
-    position: relative;
-    user-select: none;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-  }
-  .stop-card.pressing { transform: scale(0.98); box-shadow: 0 0 0 2px var(--green); }
-  .stop-top { display: flex; align-items: flex-start; gap: 11px; }
-  .stop-num {
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    background: var(--green);
-    color: #fff;
-    font-size: 12px;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    margin-top: 2px;
-  }
-  .stop-info { flex: 1; min-width: 0; }
-  .stop-cat { font-size: 11px; font-weight: 700; color: var(--green); margin-bottom: 2px; }
-  .stop-title { font-size: 15.5px; font-weight: 800; color: var(--text); }
-  .stop-meta { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
-  .stop-memo-preview {
-    margin-top: 8px;
-    background: var(--bg);
-    border-left: 3px solid var(--green);
-    padding: 6px 10px;
-    border-radius: 6px;
-    font-size: 12px;
-    color: var(--text);
-  }
-  .stop-actions {
-    display: flex;
-    gap: 6px;
-    margin-top: 11px;
-    padding-top: 10px;
-    border-top: 1px solid var(--border);
-  }
-  .mini-act {
-    flex: 1;
-    border: 1px solid var(--border);
-    background: var(--bg);
-    color: var(--text);
-    border-radius: 9px;
-    padding: 7px 6px;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-  }
-  .mini-act.del { color: var(--danger); background: #FFF6F6; border-color: #F6D6D6; }
+    /* Buttons */
+    .btn {
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 11px 16px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+    .btn:active {
+      transform: scale(0.98);
+    }
+    .btn-primary {
+      background: var(--primary-green);
+      color: #FFFFFF;
+    }
+    .btn-primary:hover {
+      background: var(--primary-green-dark);
+    }
+    .btn-sage {
+      background: var(--sage-light);
+      color: var(--primary-green);
+    }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border-soft);
+      color: var(--text-main);
+    }
+    .btn-danger {
+      background: #FDECEC;
+      color: var(--danger);
+    }
+    .btn-sm {
+      padding: 7px 11px;
+      font-size: 12px;
+      border-radius: 8px;
+    }
+    .btn-block {
+      width: 100%;
+    }
 
-  /* Canvas Map */
-  .map-box {
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    padding: 12px;
-    margin-bottom: 12px;
-  }
-  #routeCanvas {
-    width: 100%;
-    height: 290px;
-    border-radius: 12px;
-    background: #EEF4EF;
-    display: block;
-  }
+    /* Form Controls */
+    .form-group {
+      margin-bottom: 14px;
+      position: relative;
+    }
+    .form-label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-sub);
+      margin-bottom: 6px;
+    }
+    .form-input, .form-select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-soft);
+      background: var(--bg-cream);
+      font-size: 14px;
+      color: var(--text-main);
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+    .form-input:focus, .form-select:focus {
+      border-color: var(--primary-green);
+      background: #FFFFFF;
+    }
 
-  /* Forms */
-  .mode-switch {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 8px;
-    background: var(--sage);
-    padding: 5px;
-    border-radius: 14px;
-    margin-bottom: 16px;
-  }
-  .mode-btn {
-    border: none;
-    background: transparent;
-    padding: 10px 8px;
-    border-radius: 10px;
-    font-size: 13.5px;
-    font-weight: 800;
-    color: var(--green);
-    cursor: pointer;
-    min-width: 0;
-    white-space: nowrap;
-  }
-  .mode-btn.active { background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
-  .field { margin-bottom: 14px; min-width: 0; }
-  .field label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; color: var(--text); }
-  .input, select, textarea {
-    display: block;
-    width: 100%;
-    min-width: 0;
-    max-width: 100%;
-    padding: 11px 12px;
-    border: 1.5px solid var(--border);
-    border-radius: 12px;
-    font-size: 14px;
-    background: #fff;
-    color: var(--text);
-    font-family: inherit;
-  }
-  .input[type="date"], select {
-    min-height: 44px;
-  }
-  .input:focus, select:focus, textarea:focus { outline: none; border-color: var(--green); }
-  .row-2 {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 10px;
-    width: 100%;
-  }
-  .row-2 > .field {
-    min-width: 0;
-    margin-bottom: 14px;
-  }
-  .tag-group { display: flex; flex-wrap: wrap; gap: 7px; }
-  .choice-chip {
-    padding: 8px 12px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    background: #fff;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-  }
-  .choice-chip.selected { background: var(--green); color: #fff; border-color: var(--green); }
-  .error-text {
-    color: var(--danger);
-    font-size: 12px;
-    font-weight: 700;
-    margin-top: 5px;
-    display: none;
-  }
-  .error-text.show { display: block; }
+    /* Autocomplete Dropdown */
+    .autocomplete-list {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: calc(100% + 4px);
+      background: #FFFFFF;
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-md);
+      z-index: 80;
+      max-height: 210px;
+      overflow-y: auto;
+      display: none;
+    }
+    .autocomplete-list.visible {
+      display: block;
+    }
+    .autocomplete-item {
+      padding: 10px 14px;
+      border-bottom: 1px solid #F1F3EE;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .autocomplete-item:last-child {
+      border-bottom: none;
+    }
+    .autocomplete-item:hover {
+      background: var(--sage-light);
+    }
+    .ac-name {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+    .ac-meta {
+      font-size: 11.5px;
+      color: var(--text-sub);
+    }
 
-  /* Saved Trips List */
-  .saved-card {
-    background: #fff;
-    border: 1.5px solid var(--border);
-    border-radius: 18px;
-    padding: 16px;
-    margin-bottom: 12px;
-  }
-  .saved-card.current { border-color: var(--green); background: #FBFDFB; }
-  .badge-now {
-    display: inline-block;
-    font-size: 11px;
-    font-weight: 800;
-    color: #fff;
-    background: var(--green);
-    padding: 3px 8px;
-    border-radius: 6px;
-    margin-bottom: 6px;
-  }
+    /* Range Date Picker */
+    .range-summary-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-cream);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      cursor: pointer;
+    }
+    .range-dates {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13.5px;
+      font-weight: 600;
+    }
+    .range-nights-badge {
+      background: var(--sage-light);
+      color: var(--primary-green);
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 4px 9px;
+      border-radius: 999px;
+    }
+    .range-calendar-panel {
+      display: none;
+      margin-top: 8px;
+      background: #FFFFFF;
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      box-shadow: var(--shadow-md);
+    }
+    .range-calendar-panel.open {
+      display: block;
+    }
+    .cal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .cal-month-label {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .cal-weekdays, .cal-days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+      gap: 3px;
+    }
+    .cal-weekdays span {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-sub);
+      padding: 4px 0;
+    }
+    .cal-day {
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--text-main);
+    }
+    .cal-day:hover:not(.empty) {
+      background: var(--sage-light);
+    }
+    .cal-day.in-range {
+      background: var(--sage-light);
+      color: var(--primary-green);
+      font-weight: 600;
+      border-radius: 0;
+    }
+    .cal-day.selected-start, .cal-day.selected-end {
+      background: var(--primary-green) !important;
+      color: #FFFFFF !important;
+      font-weight: 700;
+      border-radius: 8px;
+    }
 
-  /* Account & Code Card */
-  .code-box {
-    background: var(--sage);
-    border: 1.5px dashed var(--green);
-    border-radius: 16px;
-    padding: 16px;
-    text-align: center;
-    margin: 14px 0;
-  }
-  .code-val {
-    font-size: 28px;
-    font-weight: 900;
-    letter-spacing: 0.22em;
-    color: var(--green);
-    margin: 6px 0;
-  }
+    /* Trip Selector & Day Tabs */
+    .trip-hero {
+      background: linear-gradient(145deg, #315C4C 0%, #26493C 100%);
+      color: #F8F7F3;
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow-md);
+    }
+    .trip-hero-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .trip-hero-city {
+      font-size: 12px;
+      color: #D2E0D5;
+      font-weight: 600;
+    }
+    .trip-hero-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin: 4px 0 6px;
+    }
+    .trip-hero-meta {
+      font-size: 12px;
+      color: #E7EEE8;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    .collab-bar {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.16);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      gap: 8px;
+    }
+    .member-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    .member-chip {
+      background: rgba(255, 255, 255, 0.16);
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+    }
+    .day-pills {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      margin-bottom: 12px;
+    }
+    .day-pill {
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border-soft);
+      background: var(--bg-card);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-sub);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .day-pill.active {
+      background: var(--primary-green);
+      color: #FFFFFF;
+      border-color: var(--primary-green);
+    }
 
-  /* Bottom Nav */
-  nav.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    max-width: 440px;
-    background: rgba(255,255,255,0.96);
-    backdrop-filter: blur(10px);
-    border-top: 1px solid var(--border);
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    padding: 8px 4px 12px;
-    z-index: 50;
-  }
-  .nav-item {
-    border: none;
-    background: transparent;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    font-size: 11.5px;
-    font-weight: 700;
-    color: var(--muted);
-    cursor: pointer;
-    min-width: 0;
-  }
-  .nav-item.active { color: var(--green); }
-  .nav-ico {
-    width: 22px;
-    height: 22px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
+    /* Timeline Stops */
+    .stop-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      margin-bottom: 10px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      box-shadow: var(--shadow-sm);
+    }
+    .stop-order {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--sage-light);
+      color: var(--primary-green);
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .stop-body {
+      flex: 1;
+      min-width: 0;
+    }
+    .stop-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+    .stop-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .stop-cat {
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--sage-light);
+      color: var(--primary-green);
+      padding: 2px 7px;
+      border-radius: 6px;
+    }
+    .stop-addr {
+      font-size: 12px;
+      color: var(--text-sub);
+      margin-top: 3px;
+    }
+    .stop-memo {
+      font-size: 12.5px;
+      color: var(--text-main);
+      background: var(--bg-cream);
+      padding: 7px 10px;
+      border-radius: 8px;
+      margin-top: 8px;
+    }
+    .stop-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
 
-  /* Modals */
-  .modal-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(20, 28, 24, 0.5);
-    z-index: 200;
-    display: none;
-    align-items: flex-end;
-    justify-content: center;
-  }
-  .modal-backdrop.open { display: flex; }
-  .modal-sheet {
-    width: 100%;
-    max-width: 440px;
-    background: #fff;
-    border-radius: 24px 24px 0 0;
-    padding: 22px 18px 28px;
-    max-height: 85vh;
-    overflow-y: auto;
-    animation: slideUp 0.2s ease;
-  }
-  @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-  .modal-title { font-size: 18px; font-weight: 800; margin-bottom: 12px; }
-  .modal-actions { display: flex; gap: 8px; margin-top: 16px; }
+    /* Map Route View */
+    .route-visual {
+      background: var(--sage-light);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    .route-step {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px dashed var(--sage-mid);
+    }
+    .route-step:last-child {
+      border-bottom: none;
+    }
 
-  /* Toast */
-  #toast {
-    position: fixed;
-    bottom: 84px;
-    left: 50%;
-    transform: translateX(-50%) translateY(16px);
-    background: #1E2421;
-    color: #fff;
-    padding: 10px 16px;
-    border-radius: 99px;
-    font-size: 13px;
-    font-weight: 600;
-    opacity: 0;
-    pointer-events: none;
-    transition: all 0.22s ease;
-    z-index: 300;
-    white-space: nowrap;
-  }
-  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-</style>
+    /* Modals & Drawers */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      max-width: 480px;
+      margin: 0 auto;
+      background: rgba(24, 32, 28, 0.45);
+      z-index: 200;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .modal-backdrop.open {
+      display: flex;
+    }
+    .modal-sheet {
+      width: 100%;
+      background: var(--bg-card);
+      border-radius: 24px 24px 0 0;
+      padding: 20px 20px 28px;
+      max-height: 86vh;
+      overflow-y: auto;
+      box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.14);
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .modal-title {
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    /* Notification Item */
+    .notif-item {
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-soft);
+      margin-bottom: 8px;
+      background: var(--bg-cream);
+    }
+    .notif-item.unread {
+      background: var(--sage-light);
+      border-color: var(--sage-mid);
+    }
+
+    /* Status Pill */
+    .status-box {
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      background: var(--sage-light);
+      color: var(--primary-green);
+      font-size: 12.5px;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      max-width: 480px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid var(--border-soft);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      padding: 8px 6px 14px;
+      z-index: 60;
+    }
+    .nav-btn {
+      background: none;
+      border: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-sub);
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .nav-btn.active {
+      color: var(--primary-green);
+    }
+    .nav-icon {
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    /* Toast */
+    .toast-msg {
+      position: fixed;
+      bottom: 84px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1F2A24;
+      color: #FFFFFF;
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-size: 12.5px;
+      font-weight: 500;
+      z-index: 500;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      white-space: nowrap;
+      max-width: 90%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .toast-msg.show {
+      opacity: 1;
+    }
+  </style>
 </head>
 <body>
-
-<!-- Splash Intro -->
-<div id="splash">
-  <svg class="splash-svg" viewBox="0 0 320 130" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <linearGradient id="tripicGrad" x1="55" y1="65" x2="255" y2="65" gradientUnits="userSpaceOnUse">
-        <stop offset="0%" stop-color="#14533C"/>
-        <stop offset="55%" stop-color="#1E8E5A"/>
-        <stop offset="100%" stop-color="#00C471"/>
-      </linearGradient>
-    </defs>
-    <!-- Start Pin -->
-    <g class="sp-pin-start">
-      <ellipse cx="48" cy="54" rx="11" ry="4" stroke="#14533C" stroke-width="2.5"/>
-      <path d="M48 16C39.2 16 32 23.1 32 31.8C32 42.6 48 53 48 53C48 53 64 42.6 64 31.8C64 23.1 56.8 16 48 16ZM48 37.5C44.7 37.5 42 34.8 42 31.5C42 28.2 44.7 25.5 48 25.5C51.3 25.5 54 28.2 54 31.5C54 34.8 51.3 37.5 48 37.5Z" fill="#14533C"/>
-    </g>
-    <!-- TRIPIC Wordmark -->
-    <text class="sp-word" x="155" y="79" text-anchor="middle" fill="url(#tripicGrad)" font-family="-apple-system, BlinkMacSystemFont, 'Pretendard', sans-serif" font-weight="900" font-style="italic" font-size="47" letter-spacing="1.5">TRIPIC</text>
-    <!-- Curved Dashed Route -->
-    <path class="sp-route" d="M34 62 C 12 88, 66 114, 246 93" stroke="url(#tripicGrad)" stroke-width="4.2" stroke-linecap="round" stroke-dasharray="9 9"/>
-    <path class="sp-arrow" d="M238 86 L 249 92.5 L 241 102" stroke="#00C471" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/>
-    <!-- End Pin -->
-    <g class="sp-pin-end">
-      <ellipse cx="272" cy="96" rx="10" ry="3.6" stroke="#00C471" stroke-width="2.4"/>
-      <path d="M272 60C263.7 60 257 66.7 257 74.9C257 85 272 95 272 95C272 95 287 85 287 74.9C287 66.7 280.3 60 272 60ZM272 80.2C268.9 80.2 266.4 77.7 266.4 74.6C266.4 71.5 268.9 69 272 69C275.1 69 277.6 71.5 277.6 74.6C277.6 77.7 275.1 80.2 272 80.2Z" fill="#00C471"/>
-    </g>
-  </svg>
-  <div class="sp-sub">나만의 여행을 콕 집다 · 트립픽</div>
-</div>
-
-<div class="app-shell">
-  <header>
-    <div class="brand" onclick="playSplash()">
-      <svg width="28" height="24" viewBox="0 0 36 28" fill="none">
-        <path d="M9 2C5.1 2 2 5.1 2 9C2 14.2 9 20 9 20C9 20 16 14.2 16 9C16 5.1 12.9 2 9 2ZM9 11.5C7.6 11.5 6.5 10.4 6.5 9C6.5 7.6 7.6 6.5 9 6.5C10.4 6.5 11.5 7.6 11.5 9C11.5 10.4 10.4 11.5 9 11.5Z" fill="#315C4C"/>
-        <path d="M8 23C14 26 24 25 31 20" stroke="#00B86B" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="3 3"/>
-        <circle cx="31" cy="14" r="4" fill="#00B86B"/>
-      </svg>
-      <span class="brand-title">TRIPIC</span>
-      <span class="brand-badge">트립픽</span>
+  <div class="app-shell">
+    <!-- Splash Screen -->
+    <div id="splashScreen" class="splash-screen">
+      <div class="splash-logo">TRIPIC</div>
+      <div class="splash-sub">함께 완성하는 감성 여행 루트 플래너</div>
     </div>
-    <div class="header-actions">
-      <button class="icon-btn" title="로고 인트로 다시보기" onclick="playSplash()">&#8635;</button>
-      <div class="user-pill" id="headerUserPill" onclick="switchTab('account')">게스트</div>
+
+    <!-- Top Header -->
+    <header class="top-header">
+      <div>
+        <span class="brand-title">TRIPIC</span>
+        <span class="brand-badge">트립픽</span>
+      </div>
+      <div class="header-actions">
+        <button type="button" class="user-pill" onclick="switchTab('account')">
+          <span class="user-dot"></span>
+          <span id="headerUserLabel">게스트</span>
+        </button>
+        <button type="button" class="bell-btn" aria-label="알림 센터" onclick="openNotifModal()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <span id="bellBadge" class="bell-badge">0</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Live Invite Alert Banner -->
+    <div id="inviteToastBanner" class="invite-toast-banner">
+      <div class="invite-toast-text" id="inviteToastText">새 동행 초대가 도착했습니다.</div>
+      <div class="invite-toast-actions">
+        <button type="button" class="btn btn-sm" style="background:#FFFFFF;color:#315C4C;" onclick="openNotifModal()">확인</button>
+        <button type="button" class="btn btn-sm" style="background:rgba(255,255,255,0.2);color:#FFFFFF;" onclick="dismissInviteBanner()">닫기</button>
+      </div>
     </div>
-  </header>
 
-  <main>
-    <!-- TAB 1: 내 루트 -->
-    <section id="tab-route" class="tab-panel active"></section>
-
-    <!-- TAB 2: 새 여행 -->
-    <section id="tab-create" class="tab-panel">
-      <div class="card">
-        <div class="mode-switch">
-          <button class="mode-btn active" id="modeManualBtn" onclick="setCreateMode('manual')">직접 일정 짜기</button>
-          <button class="mode-btn" id="modeAiBtn" onclick="setCreateMode('ai')">AI 일정 추천</button>
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- TAB 1: 내 일정 -->
+      <section id="tab-itinerary" class="tab-view active">
+        <div id="tripSwitcherWrap" style="margin-bottom:10px; display:none;">
+          <select id="tripSelector" class="form-select" onchange="selectTrip(this.value)"></select>
         </div>
 
-        <div class="field">
-          <label>여행 제목 (비워두면 자동 설정)</label>
-          <input class="input" id="inpTitle" placeholder="예: 우리끼리 봄 제주 힐링 여행" />
-        </div>
+        <div id="itineraryContent"></div>
+      </section>
 
-        <div class="field">
-          <label>여행지 (도시 / 지역)</label>
-          <input class="input" id="inpCity" placeholder="예: 제주, 도쿄, 부산, 강릉" value="제주" />
-        </div>
-
-        <div class="row-2">
-          <div class="field">
-            <label>출발일</label>
-            <input class="input" type="date" id="inpStart" onchange="syncEndDate()" />
+      <!-- TAB 2: 새 여행 -->
+      <section id="tab-create" class="tab-view">
+        <div class="section-card">
+          <div class="card-title-row">
+            <div>
+              <div class="card-title">새 여행 일정 만들기</div>
+              <div class="card-sub">여행지를 먼저 고르고 기간을 선택해 루트를 시작하세요</div>
+            </div>
           </div>
-          <div class="field">
-            <label>도착일</label>
-            <input class="input" type="date" id="inpEnd" />
-          </div>
-        </div>
 
-        <div class="field">
-          <label>동행 인원</label>
-          <select id="inpPeople">
-            <option value="혼자 (1명)">혼자 (1명)</option>
-            <option value="2명 (커플/친구)" selected>2명 (커플/친구)</option>
-            <option value="3~4명 (소그룹)">3~4명 (소그룹)</option>
-            <option value="5명 이상 (단체/가족)">5명 이상 (단체/가족)</option>
+          <div class="form-group">
+            <label class="form-label" for="createCityInput">여행지 (필수)</label>
+            <input type="text" id="createCityInput" class="form-input" placeholder="예: 서울, 제주, 부산, 강릉, 경주, 도쿄, 오사카" autocomplete="off" oninput="handleCityInput(this.value)" onfocus="handleCityInput(this.value)" />
+            <div id="cityAutocomplete" class="autocomplete-list"></div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="createTitleInput">여행 제목</label>
+            <input type="text" id="createTitleInput" class="form-input" placeholder="예: 가을 감성 서울 미식 투어" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">여행 기간 (Range Date Picker · 최대 10일)</label>
+            <div class="range-summary-box" onclick="toggleRangeCalendar()">
+              <div class="range-dates">
+                <span id="rangeStartLabel">2026-11-26</span>
+                <span style="color:var(--text-sub);">→</span>
+                <span id="rangeEndLabel">2026-11-27</span>
+              </div>
+              <span id="rangeNightsBadge" class="range-nights-badge">1박 2일</span>
+            </div>
+            <div id="rangeCalendarPanel" class="range-calendar-panel">
+              <div class="cal-header">
+                <button type="button" class="btn btn-sm btn-outline" onclick="changeCalMonth(-1)">이전 달</button>
+                <span id="calMonthLabel" class="cal-month-label">2026년 11월</span>
+                <button type="button" class="btn btn-sm btn-outline" onclick="changeCalMonth(1)">다음 달</button>
+              </div>
+              <div class="cal-weekdays">
+                <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
+              </div>
+              <div id="calDaysGrid" class="cal-days"></div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="createPeopleSelect">동행 인원</label>
+            <select id="createPeopleSelect" class="form-select">
+              <option value="1명 (혼자 여행)">1명 (혼자 여행)</option>
+              <option value="2명 (커플/친구)" selected>2명 (커플/친구)</option>
+              <option value="3~4명 (소규모 그룹)">3~4명 (소규모 그룹)</option>
+              <option value="5명 이상 (단체/가족)">5명 이상 (단체/가족)</option>
+            </select>
+          </div>
+
+          <button type="button" class="btn btn-primary btn-block" onclick="createNewTrip()">일정 생성하기</button>
+        </div>
+      </section>
+
+      <!-- TAB 3: 동선/지도 -->
+      <section id="tab-map" class="tab-view">
+        <div id="mapContent"></div>
+      </section>
+
+      <!-- TAB 4: 내 계정 & 클라우드 동기화 -->
+      <section id="tab-account" class="tab-view">
+        <div id="accountContent"></div>
+      </section>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+      <button type="button" class="nav-btn active" data-tab="itinerary" onclick="switchTab('itinerary')">
+        <span class="nav-icon">🗓️</span>
+        <span>내 일정</span>
+      </button>
+      <button type="button" class="nav-btn" data-tab="create" onclick="switchTab('create')">
+        <span class="nav-icon">✨</span>
+        <span>새 여행</span>
+      </button>
+      <button type="button" class="nav-btn" data-tab="map" onclick="switchTab('map')">
+        <span class="nav-icon">🗺️</span>
+        <span>동선 요약</span>
+      </button>
+      <button type="button" class="nav-btn" data-tab="account" onclick="switchTab('account')">
+        <span class="nav-icon">👤</span>
+        <span>내 계정</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Add / Edit Stop Modal -->
+  <div id="stopModal" class="modal-backdrop" onclick="if(event.target===this) closeStopModal()">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <div class="modal-title" id="stopModalTitle">장소 추가</div>
+        <button type="button" class="btn btn-sm btn-outline" onclick="closeStopModal()">닫기</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="stopSearchInput">장소 검색 (<span id="stopCityHint">현재 여행지</span> 우선)</label>
+        <input type="text" id="stopSearchInput" class="form-input" placeholder="장소명 또는 도로명 주소" autocomplete="off" oninput="handlePlaceSearchInput(this.value)" onfocus="handlePlaceSearchInput(this.value)" />
+        <div id="placeAutocomplete" class="autocomplete-list"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="stopAddressInput">도로명 주소 / 상세 위치</label>
+        <input type="text" id="stopAddressInput" class="form-input" placeholder="예: 서울특별시 종로구 사직로 161" />
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <div class="form-group">
+          <label class="form-label" for="stopTimeInput">방문 시간</label>
+          <input type="time" id="stopTimeInput" class="form-input" value="10:30" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="stopCategorySelect">카테고리</label>
+          <select id="stopCategorySelect" class="form-select">
+            <option value="명소">명소</option>
+            <option value="카페">카페</option>
+            <option value="맛집">맛집</option>
+            <option value="숙소">숙소</option>
+            <option value="쇼핑">쇼핑</option>
           </select>
         </div>
-
-        <div id="aiOnlyFields" style="display:none;">
-          <div class="field">
-            <label>예산 수준</label>
-            <div class="tag-group" id="budgetTags">
-              <button type="button" class="choice-chip" onclick="selectSingle(this, 'budgetTags')">가성비 알뜰</button>
-              <button type="button" class="choice-chip selected" onclick="selectSingle(this, 'budgetTags')">적당한 균형</button>
-              <button type="button" class="choice-chip" onclick="selectSingle(this, 'budgetTags')">여유로운 럭셔리</button>
-            </div>
-          </div>
-          <div class="field">
-            <label>주요 이동 수단</label>
-            <div class="tag-group" id="transportTags">
-              <button type="button" class="choice-chip selected" onclick="selectSingle(this, 'transportTags')">대중교통/도보</button>
-              <button type="button" class="choice-chip" onclick="selectSingle(this, 'transportTags')">렌터카/자차</button>
-              <button type="button" class="choice-chip" onclick="selectSingle(this, 'transportTags')">택시 위주</button>
-            </div>
-          </div>
-          <div class="field">
-            <label>여행 스타일 (복수 선택)</label>
-            <div class="tag-group" id="styleTags">
-              <button type="button" class="choice-chip selected" onclick="this.classList.toggle('selected')">맛집 탐방</button>
-              <button type="button" class="choice-chip selected" onclick="this.classList.toggle('selected')">감성 카페</button>
-              <button type="button" class="choice-chip" onclick="this.classList.toggle('selected')">자연/풍경</button>
-              <button type="button" class="choice-chip" onclick="this.classList.toggle('selected')">액티비티</button>
-              <button type="button" class="choice-chip" onclick="this.classList.toggle('selected')">쇼핑/소품샵</button>
-            </div>
-          </div>
-          <div class="field">
-            <label>추가 요청사항</label>
-            <input class="input" id="inpNote" placeholder="예: 아침 일찍 시작하지 않고 여유롭게" />
-          </div>
-        </div>
-
-        <button class="btn btn-primary" id="submitTripBtn" onclick="createTrip()">빈 일정표 시작하기</button>
       </div>
-    </section>
+      <div class="form-group">
+        <label class="form-label" for="stopMemoInput">동행 메모</label>
+        <input type="text" id="stopMemoInput" class="form-input" placeholder="예: 창가 자리 예약 확인, 주차 가능" />
+      </div>
+      <button type="button" class="btn btn-primary btn-block" onclick="saveStopFromModal()">일정에 저장</button>
+    </div>
+  </div>
 
-    <!-- TAB 3: 내 여행 -->
-    <section id="tab-trips" class="tab-panel"></section>
+  <!-- Invite Friend Modal -->
+  <div id="inviteModal" class="modal-backdrop" onclick="if(event.target===this) closeInviteModal()">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <div class="modal-title">동행 친구 초대하기</div>
+        <button type="button" class="btn btn-sm btn-outline" onclick="closeInviteModal()">닫기</button>
+      </div>
+      <p style="font-size:13px; color:var(--text-sub); margin-bottom:12px;">
+        초대된 친구에게만 이 일정의 편집 권한이 부여되며, 실시간으로 함께 루트를 수정할 수 있습니다.
+      </p>
+      <div class="form-group">
+        <label class="form-label" for="inviteCodeInput">친구 4자리 초대코드 입력</label>
+        <input type="text" id="inviteCodeInput" class="form-input" maxlength="4" placeholder="예: 4829" style="text-transform:uppercase; letter-spacing:0.15em; font-weight:700;" />
+      </div>
+      <button type="button" class="btn btn-primary btn-block" onclick="sendTripInvite()">초대 알림 보내기</button>
+    </div>
+  </div>
 
-    <!-- TAB 4: 내 계정 -->
-    <section id="tab-account" class="tab-panel"></section>
-  </main>
+  <!-- Notification Center Modal -->
+  <div id="notifModal" class="modal-backdrop" onclick="if(event.target===this) closeNotifModal()">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <div class="modal-title">알림 및 동행 초대</div>
+        <div style="display:flex; gap:6px;">
+          <button type="button" class="btn btn-sm btn-sage" onclick="markAllNotificationsRead()">모두 읽음</button>
+          <button type="button" class="btn btn-sm btn-outline" onclick="closeNotifModal()">닫기</button>
+        </div>
+      </div>
+      <div id="notifListContainer"></div>
+    </div>
+  </div>
 
-  <nav class="bottom-nav">
-    <button class="nav-item active" data-tab="route" onclick="switchTab('route')">
-      <span class="nav-ico">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="9"/>
-          <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
-        </svg>
-      </span>
-      <span>내 루트</span>
-    </button>
-    <button class="nav-item" data-tab="create" onclick="switchTab('create')">
-      <span class="nav-ico">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="9"/>
-          <line x1="12" y1="8" x2="12" y2="16"/>
-          <line x1="8" y1="12" x2="16" y2="12"/>
-        </svg>
-      </span>
-      <span>새 여행</span>
-    </button>
-    <button class="nav-item" data-tab="trips" onclick="switchTab('trips')">
-      <span class="nav-ico">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/>
-        </svg>
-      </span>
-      <span>내 여행</span>
-    </button>
-    <button class="nav-item" data-tab="account" onclick="switchTab('account')">
-      <span class="nav-ico">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M20 21a8 8 0 0 0-16 0"/>
-          <circle cx="12" cy="8" r="4"/>
-        </svg>
-      </span>
-      <span>내 계정</span>
-    </button>
-  </nav>
-</div>
+  <div id="toastMsg" class="toast-msg"></div>
 
-<!-- Generic Modal -->
-<div class="modal-backdrop" id="modalBackdrop" onclick="if(event.target===this) closeModal()">
-  <div class="modal-sheet" id="modalContent"></div>
-</div>
+  <script>
+    /* =========================================================
+       1. Fixed Supabase Configuration & State Management
+       ========================================================= */
+    const SUPABASE_BASE_URL = "https://prgfihjpnggozlwqgvso.supabase.co";
+    const SUPABASE_REST_URL = SUPABASE_BASE_URL + "/rest/v1";
+    const SUPABASE_ANON_KEY = "sb_publishable_H05pAoINx2tS24M6uG_4DQ_xma6XgdI";
 
-<div id="toast"></div>
+    const REGION_CATALOG = [
+      { short: "서울", full: "서울특별시", desc: "대한민국 수도 · 고궁·성수·한강 루트" },
+      { short: "부산", full: "부산광역시", desc: "해운대·광안리·영도 오션뷰 코스" },
+      { short: "제주", full: "제주특별자치도", desc: "애월·성산·서귀포 감성 드라이브" },
+      { short: "강릉", full: "강원특별자치도 강릉시", desc: "안목해변 커피거리·경포대" },
+      { short: "속초", full: "강원특별자치도 속초시", desc: "설악산·영금정·중앙시장" },
+      { short: "경주", full: "경상북도 경주시", desc: "황리단길·불국사·동궁과 월지" },
+      { short: "전주", full: "전북특별자치도 전주시", desc: "전주한옥마을·객리단길 미식" },
+      { short: "여수", full: "전라남도 여수시", desc: "돌산대교·향일암·여수밤바다" },
+      { short: "인천", full: "인천광역시", desc: "송도·차이나타운·을왕리" },
+      { short: "대구", full: "대구광역시", desc: "동성로·수성못·김광석길" },
+      { short: "대전", full: "대전광역시", desc: "성심당·대동하늘공원·유성온천" },
+      { short: "도쿄", full: "일본 도쿄도", desc: "시부야·아사쿠사·나카메구로" },
+      { short: "오사카", full: "일본 오사카부", desc: "도톤보리·우메다·유니버설" },
+      { short: "후쿠오카", full: "일본 후쿠오카현", desc: "텐진·하카타·오호리공원" }
+    ];
 
-<script>
-const STORAGE_KEY = 'tripic_app_state_v1';
+    const PLACE_CATALOG = [
+      { city: "서울특별시", name: "경복궁", addr: "서울특별시 종로구 사직로 161", cat: "명소" },
+      { city: "서울특별시", name: "북촌 한옥마을", addr: "서울특별시 종로구 계동길 37", cat: "명소" },
+      { city: "서울특별시", name: "성수 카페거리", addr: "서울특별시 성동구 연무장길 74", cat: "카페" },
+      { city: "서울특별시", name: "N서울타워", addr: "서울특별시 용산구 남산공원길 105", cat: "명소" },
+      { city: "서울특별시", name: "더현대 서울", addr: "서울특별시 영등포구 여의대로 108", cat: "쇼핑" },
+      { city: "부산광역시", name: "해운대 해수욕장", addr: "부산광역시 해운대구 해운대해변로 264", cat: "명소" },
+      { city: "부산광역시", name: "광안리 해수욕장", addr: "부산광역시 수영구 광안해변로 219", cat: "명소" },
+      { city: "부산광역시", name: "흰여울문화마을", addr: "부산광역시 영도구 흰여울길 379", cat: "명소" },
+      { city: "부산광역시", name: "모모스커피 본점", addr: "부산광역시 금정구 오시게로 20", cat: "카페" },
+      { city: "제주특별자치도", name: "성산일출봉", addr: "제주특별자치도 서귀포시 성산읍 일출로 284-12", cat: "명소" },
+      { city: "제주특별자치도", name: "애월 카페거리", addr: "제주특별자치도 제주시 애월읍 애월북서길 56", cat: "카페" },
+      { city: "제주특별자치도", name: "우도", addr: "제주특별자치도 제주시 우도면", cat: "명소" },
+      { city: "강원특별자치도 강릉시", name: "안목해변 커피거리", addr: "강원특별자치도 강릉시 창해로14번길 20-1", cat: "카페" },
+      { city: "강원특별자치도 강릉시", name: "경포해변", addr: "강원특별자치도 강릉시 창해로 514", cat: "명소" },
+      { city: "경상북도 경주시", name: "황리단길", addr: "경상북도 경주시 포석로 1080", cat: "맛집" },
+      { city: "경상북도 경주시", name: "동궁과 월지", addr: "경상북도 경주시 원화로 102", cat: "명소" },
+      { city: "일본 도쿄도", name: "시부야 스카이", addr: "2-24-12 Shibuya, Shibuya-ku, Tokyo", cat: "명소" },
+      { city: "일본 도쿄도", name: "센소지 (아사쿠사)", addr: "2-3-1 Asakusa, Taito-ku, Tokyo", cat: "명소" },
+      { city: "일본 오사카부", name: "도톤보리 글리코상", addr: "1-10-3 Dotonbori, Chuo-ku, Osaka", cat: "명소" }
+    ];
 
-const ICONS = {
-  pin: `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6-5.35-6-10a6 6 0 0 1 12 0c0 4.65-6 10-6 10z"/><circle cx="12" cy="11" r="2.2"/></svg>`,
-  folder: `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>`,
-  user: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="8" r="4"/></svg>`
-};
+    let currentUser = null; // { user_id, nickname, code }
+    let appState = {
+      trips: [],
+      activeTripId: null,
+      activeDay: 1,
+      notifications: []
+    };
 
-const SPOT_POOL = {
-  '제주': [
-    { name: '애월 한담해안산책로', cat: '자연/산책', time: '10:00', duration: '1시간 30분', desc: '에메랄드빛 바다를 따라 걷는 대표 해안 코스' },
-    { name: '랜디스도넛 애월점', cat: '감성 카페', time: '12:00', duration: '1시간', desc: '오션뷰 테라스와 수제 도넛이 인기인 카페' },
-    { name: '협재해수욕장 & 비양도 뷰', cat: '자연/풍경', time: '14:00', duration: '2시간', desc: '하얀 모래사장과 얕고 투명한 바다 풍경' },
-    { name: '올래국수 본점', cat: '맛집 탐방', time: '17:30', duration: '1시간', desc: '진한 육수의 제주 대표 고기국수 전문점' },
-    { name: '동문재래시장 야시장', cat: '먹거리/쇼핑', time: '19:30', duration: '1시간 30분', desc: '흑돼지 강정과 딱새우회 등 다양한 로컬 야식' },
-    { name: '성산일출봉 둘레길', cat: '자연/명소', time: '09:30', duration: '2시간', desc: '유네스코 세계자연유산 분화구와 해안 절경' },
-    { name: '우도 서빈백사 & 땅콩아이스크림', cat: '섬 투어', time: '13:00', duration: '3시간', desc: '배 타고 15분 만에 만나는 산호 해변 드라이브' },
-    { name: '월정리 해변 카페거리', cat: '감성 카페', time: '16:30', duration: '1시간 30분', desc: '통유리 너머 파도를 보며 쉬어가는 카페 거리' }
-  ],
-  '도쿄': [
-    { name: '아사쿠사 센소지 & 나카미세', cat: '명소/산책', time: '09:30', duration: '2시간', desc: '도쿄의 전통 분위기를 느끼는 대표 사찰 거리' },
-    { name: '우에노 아메요코 시장 점심', cat: '맛집 탐방', time: '12:00', duration: '1시간 30분', desc: '활기찬 재래시장 골목의 가성비 카이센동' },
-    { name: '시부야 스카이 전망대', cat: '전망/야경', time: '16:30', duration: '2시간', desc: '도쿄 도심 360도 파노라마 뷰 루프탑 전망대' },
-    { name: '오모테산도 & 하라주쿠 캣스트리트', cat: '쇼핑/카페', time: '14:00', duration: '2시간', desc: '감각적인 편집숍과 스페셜티 커피가 모인 거리' },
-    { name: '신주쿠 오모이데요코초', cat: '로컬 맛집', time: '19:30', duration: '2시간', desc: '레트로 감성 골목에서 즐기는 야키토리 저녁' }
-  ],
-  '기본': [
-    { name: '로컬 브런치 & 스페셜티 카페', cat: '감성 카페', time: '10:30', duration: '1시간 30분', desc: '여행의 첫 시작을 여는 여유로운 모닝 커피' },
-    { name: '핵심 랜드마크 산책 코스', cat: '명소/산책', time: '12:30', duration: '2시간', desc: '대표 포토스팟과 주변 골목을 둘러보는 코스' },
-    { name: '현지인 추천 시그니처 식당', cat: '맛집 탐방', time: '15:00', duration: '1시간 30분', desc: '지역 특색 메뉴를 맛볼 수 있는 인기 맛집' },
-    { name: '노을 전망 포인트 & 야경 스팟', cat: '자연/야경', time: '18:00', duration: '2시간', desc: '해 질 녘 가장 아름다운 야경을 감상하는 장소' }
-  ]
-};
+    let syncStatus = {
+      ok: false,
+      label: "연결 확인 중...",
+      detail: ""
+    };
 
-let state = {
-  trips: [],
-  activeTripId: null,
-  activeDay: 1,
-  viewMode: 'timeline',
-  createMode: 'manual',
-  currentUser: null,
-  users: []
-};
+    // Range picker state
+    let rangeStart = "";
+    let rangeEnd = "";
+    let calYear = 2026;
+    let calMonth = 10; // 0-indexed (10 = Nov)
+    let editingStopIndex = null;
+    let syncTimer = null;
 
-function genCode() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let out = '';
-  for (let i = 0; i < 4; i++) out += chars[Math.floor(Math.random() * chars.length)];
-  return out;
-}
-
-function loadState() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      state = { ...state, ...parsed };
+    /* =========================================================
+       2. Utility & Storage Isolation Helpers
+       ========================================================= */
+    function formatDate(d) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
     }
-  } catch (e) {}
-  if (!state.currentUser) {
-    if (!state.guestCode) state.guestCode = genCode();
-  }
-}
 
-function saveState() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch (e) {}
-}
+    function parseDate(str) {
+      const [y, m, d] = str.split("-").map(Number);
+      return new Date(y, m - 1, d);
+    }
 
-function showToast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(window._toastTimer);
-  window._toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
-}
+    function addDays(str, delta) {
+      const dt = parseDate(str);
+      dt.setDate(dt.getDate() + delta);
+      return formatDate(dt);
+    }
 
-function playSplash() {
-  const sp = document.getElementById('splash');
-  sp.classList.remove('hide');
-  const svg = sp.querySelector('svg');
-  const clone = svg.cloneNode(true);
-  svg.parentNode.replaceChild(clone, svg);
-  clearTimeout(window._splashTimer);
-  window._splashTimer = setTimeout(() => sp.classList.add('hide'), 2150);
-}
+    function diffDays(startStr, endStr) {
+      const ms = parseDate(endStr) - parseDate(startStr);
+      return Math.round(ms / 86400000);
+    }
 
-function switchTab(tab) {
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-' + tab).classList.add('active');
-  document.querySelector(`.nav-item[data-tab="${tab}"]`).classList.add('active');
-  if (tab === 'route') renderRouteTab();
-  if (tab === 'trips') renderTripsTab();
-  if (tab === 'account') renderAccountTab();
-}
+    function getStorageKey() {
+      return currentUser ? `tripic_isolated_${currentUser.user_id}` : "tripic_isolated_guest";
+    }
 
-function setCreateMode(mode) {
-  state.createMode = mode;
-  document.getElementById('modeManualBtn').classList.toggle('active', mode === 'manual');
-  document.getElementById('modeAiBtn').classList.toggle('active', mode === 'ai');
-  document.getElementById('aiOnlyFields').style.display = mode === 'ai' ? 'block' : 'none';
-  document.getElementById('submitTripBtn').textContent = mode === 'manual' ? '빈 일정표 시작하기' : 'AI 맞춤 여행 일정 생성하기';
-}
+    function showToast(msg) {
+      const el = document.getElementById("toastMsg");
+      el.textContent = msg;
+      el.classList.add("show");
+      clearTimeout(el._t);
+      el._t = setTimeout(() => el.classList.remove("show"), 2600);
+    }
 
-function selectSingle(btn, groupId) {
-  document.querySelectorAll(`#${groupId} .choice-chip`).forEach(c => c.classList.remove('selected'));
-  btn.classList.add('selected');
-}
+    function saveLocalState() {
+      try {
+        localStorage.setItem(getStorageKey(), JSON.stringify(appState));
+      } catch (e) {}
+    }
 
-function syncEndDate() {
-  const startInp = document.getElementById('inpStart');
-  const endInp = document.getElementById('inpEnd');
-  if (!startInp || !endInp || !startInp.value) return;
-  endInp.min = startInp.value;
-  if (!endInp.value || endInp.value < startInp.value) {
-    endInp.value = startInp.value;
-  }
-}
+    function loadLocalState() {
+      try {
+        const raw = localStorage.getItem(getStorageKey());
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          appState = {
+            trips: Array.isArray(parsed.trips) ? parsed.trips : [],
+            activeTripId: parsed.activeTripId || null,
+            activeDay: parsed.activeDay || 1,
+            notifications: Array.isArray(parsed.notifications) ? parsed.notifications : []
+          };
+        } else {
+          appState = { trips: [], activeTripId: null, activeDay: 1, notifications: [] };
+        }
+      } catch (e) {
+        appState = { trips: [], activeTripId: null, activeDay: 1, notifications: [] };
+      }
 
-function getActiveTrip() {
-  return state.trips.find(t => t.id === state.activeTripId) || null;
-}
+      if (appState.trips.length === 0) {
+        seedDefaultTrip();
+      }
+      if (!appState.activeTripId || !appState.trips.some(t => t.id === appState.activeTripId)) {
+        appState.activeTripId = appState.trips[0]?.id || null;
+      }
+    }
 
-function createTrip() {
-  const city = (document.getElementById('inpCity').value || '').trim() || '제주';
-  const titleInput = (document.getElementById('inpTitle').value || '').trim();
-  const start = document.getElementById('inpStart').value || new Date().toISOString().slice(0, 10);
-  const end = document.getElementById('inpEnd').value || start;
-  const people = document.getElementById('inpPeople').value;
+    function seedDefaultTrip() {
+      const today = formatDate(new Date());
+      const tomorrow = addDays(today, 1);
+      const ownerId = currentUser ? currentUser.user_id : "guest";
+      const ownerName = currentUser ? currentUser.nickname : "게스트";
+      const sampleTrip = {
+        id: "trip_" + Date.now(),
+        ownerId: ownerId,
+        memberIds: [ownerId],
+        members: [{ userId: ownerId, nickname: ownerName, role: "방장" }],
+        title: "서울 감성 산책 & 카페 루트",
+        city: "서울특별시",
+        startDate: today,
+        endDate: tomorrow,
+        people: "2명 (커플/친구)",
+        days: {
+          1: [
+            { time: "10:30", name: "경복궁", addr: "서울특별시 종로구 사직로 161", cat: "명소", memo: "광화문 수문장 교대식 관람" },
+            { time: "14:00", name: "성수 카페거리", addr: "서울특별시 성동구 연무장길 74", cat: "카페", memo: "로스터리 카페에서 휴식" }
+          ],
+          2: [
+            { time: "11:30", name: "더현대 서울", addr: "서울특별시 영등포구 여의대로 108", cat: "쇼핑", memo: "사운즈 포레스트 산책 및 점심" }
+          ]
+        },
+        lastEditor: ownerName,
+        updatedAt: new Date().toISOString()
+      };
+      appState.trips = [sampleTrip];
+      appState.activeTripId = sampleTrip.id;
+      appState.activeDay = 1;
+      saveLocalState();
+    }
 
-  const d1 = new Date(start);
-  const d2 = new Date(end);
-  let dayCount = Math.max(1, Math.min(10, Math.round((d2 - d1) / 86400000) + 1));
-  if (isNaN(dayCount)) dayCount = 2;
+    /* =========================================================
+       3. Supabase Direct REST API Client
+       ========================================================= */
+    async function sbRequest(path, options = {}) {
+      const headers = {
+        "apikey": SUPABASE_ANON_KEY,
+        "Content-Type": "application/json",
+        ...(options.headers || {})
+      };
+      if (!SUPABASE_ANON_KEY.startsWith("sb_publishable_")) {
+        headers["Authorization"] = `Bearer ${SUPABASE_ANON_KEY}`;
+      }
+      const res = await fetch(`${SUPABASE_REST_URL}${path}`, {
+        ...options,
+        headers
+      });
+      const text = await res.text();
+      let data = null;
+      try {
+        data = text ? JSON.parse(text) : null;
+      } catch (e) {
+        data = text;
+      }
+      if (!res.ok) {
+        const msg = (data && data.message) ? data.message : `HTTP ${res.status}`;
+        throw new Error(`HTTP ${res.status}: ${msg}`);
+      }
+      return data;
+    }
 
-  const days = {};
-  const pool = SPOT_POOL[city] || SPOT_POOL['기본'];
+    async function syncWithSupabase(manual = false) {
+      try {
+        await sbRequest("/tripic_users?select=user_id&limit=1");
+        syncStatus = {
+          ok: true,
+          label: "Supabase 클라우드 실시간 연동됨",
+          detail: "회원·일정·초대 알림이 정상적으로 동기화되고 있습니다."
+        };
 
-  for (let d = 1; d <= dayCount; d++) {
-    if (state.createMode === 'manual') {
-      days[d] = [];
-    } else {
-      const picks = [];
-      for (let i = 0; i < 3; i++) {
-        const item = pool[((d - 1) * 3 + i) % pool.length];
-        picks.push({
-          id: 'sp_' + Date.now() + '_' + d + '_' + i,
-          name: city !== '제주' && city !== '도쿄' ? `${city} ${item.name}` : item.name,
-          cat: item.cat,
-          time: ['10:00', '13:30', '17:30'][i],
-          duration: item.duration,
-          desc: item.desc,
-          memo: ''
+        if (currentUser) {
+          // Pull user's own or invited trips
+          const allTrips = await sbRequest("/tripic_trips?select=*");
+          if (Array.isArray(allTrips)) {
+            const myTrips = allTrips.filter(row => {
+              const mIds = Array.isArray(row.member_ids) ? row.member_ids : [];
+              return row.owner_id === currentUser.user_id || mIds.includes(currentUser.user_id);
+            });
+
+            myTrips.forEach(remote => {
+              const localIdx = appState.trips.findIndex(t => t.id === remote.id);
+              const mapped = {
+                id: remote.id,
+                ownerId: remote.owner_id,
+                memberIds: Array.isArray(remote.member_ids) ? remote.member_ids : [remote.owner_id],
+                members: Array.isArray(remote.members) ? remote.members : [],
+                title: remote.title,
+                city: remote.city,
+                startDate: remote.start_date,
+                endDate: remote.end_date,
+                people: remote.people || "2명 (커플/친구)",
+                days: remote.days || {},
+                lastEditor: remote.last_editor || "",
+                updatedAt: remote.updated_at || new Date().toISOString()
+              };
+
+              if (localIdx === -1) {
+                appState.trips.push(mapped);
+              } else {
+                const localTime = new Date(appState.trips[localIdx].updatedAt || 0).getTime();
+                const remoteTime = new Date(mapped.updatedAt || 0).getTime();
+                if (remoteTime > localTime) {
+                  appState.trips[localIdx] = mapped;
+                }
+              }
+            });
+          }
+
+          // Pull notifications addressed to current user
+          const notifs = await sbRequest(`/tripic_notifications?to_code=eq.${encodeURIComponent(currentUser.code)}&order=created_at.desc`);
+          if (Array.isArray(notifs)) {
+            const prevUnread = appState.notifications.filter(n => !n.is_read).length;
+            appState.notifications = notifs;
+            const nextUnread = notifs.filter(n => !n.is_read).length;
+            if (nextUnread > prevUnread) {
+              const newest = notifs.find(n => !n.is_read);
+              if (newest) showInviteBanner(`${newest.from_name}님이 '${newest.trip_title}' 일정에 초대했습니다.`);
+            }
+          }
+
+          saveLocalState();
+          renderAll();
+        }
+
+        if (manual) showToast("클라우드 동기화가 완료되었습니다.");
+      } catch (err) {
+        syncStatus = {
+          ok: false,
+          label: "클라우드 동기화 점검 필요",
+          detail: `진단: ${err.message}`
+        };
+        if (manual) showToast(`동기화 오류: ${err.message}`);
+      }
+      if (document.getElementById("tab-account").classList.contains("active")) {
+        renderAccountTab();
+      }
+    }
+
+    async function pushTripToSupabase(trip) {
+      if (!currentUser) return;
+      try {
+        await sbRequest("/tripic_trips", {
+          method: "POST",
+          headers: { "Prefer": "resolution=merge-duplicates" },
+          body: JSON.stringify({
+            id: trip.id,
+            owner_id: trip.ownerId,
+            member_ids: trip.memberIds,
+            members: trip.members,
+            title: trip.title,
+            city: trip.city,
+            start_date: trip.startDate,
+            end_date: trip.endDate,
+            people: trip.people,
+            days: trip.days,
+            last_editor: currentUser.nickname,
+            updated_at: trip.updatedAt
+          })
         });
-      }
-      days[d] = picks;
+      } catch (e) {}
     }
-  }
 
-  const ownerName = state.currentUser ? state.currentUser.nickname : '나(게스트)';
-  const newTrip = {
-    id: 'trip_' + Date.now(),
-    title: titleInput || `${city} ${dayCount === 1 ? '당일치기' : (dayCount - 1) + '박 ' + dayCount + '일'} 여행`,
-    city,
-    start,
-    end,
-    people,
-    mode: state.createMode,
-    members: [ownerName],
-    days
-  };
+    /* =========================================================
+       4. Permission & Trip Helpers
+       ========================================================= */
+    function getActiveTrip() {
+      return appState.trips.find(t => t.id === appState.activeTripId) || appState.trips[0] || null;
+    }
 
-  state.trips.unshift(newTrip);
-  state.activeTripId = newTrip.id;
-  state.activeDay = 1;
-  saveState();
-  showToast(state.createMode === 'manual' ? '빈 일정표가 생성되었어요!' : 'AI 맞춤 일정이 생성되었어요!');
-  switchTab('route');
-}
+    function canEditTrip(trip) {
+      if (!trip) return false;
+      const uid = currentUser ? currentUser.user_id : "guest";
+      if (trip.ownerId === uid) return true;
+      return Array.isArray(trip.memberIds) && trip.memberIds.includes(uid);
+    }
 
-function renderRouteTab() {
-  const container = document.getElementById('tab-route');
-  const trip = getActiveTrip();
+    function selectTrip(tripId) {
+      appState.activeTripId = tripId;
+      appState.activeDay = 1;
+      saveLocalState();
+      renderAll();
+    }
 
-  if (!trip) {
-    container.innerHTML = `
-      <div class="empty-box">
-        <div class="empty-icon">${ICONS.pin}</div>
-        <div class="empty-title">아직 계획된 여행 루트가 없어요</div>
-        <div class="empty-desc">
-          원하는 장소를 하나씩 직접 담거나,<br/>
-          AI 추천으로 첫 여행 일정을 시작해 보세요.
+    /* =========================================================
+       5. Navigation & Range Date Picker
+       ========================================================= */
+    function switchTab(tabName) {
+      document.querySelectorAll(".tab-view").forEach(v => v.classList.remove("active"));
+      document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+      const target = document.getElementById(`tab-${tabName}`);
+      if (target) target.classList.add("active");
+      const btn = document.querySelector(`.nav-btn[data-tab="${tabName}"]`);
+      if (btn) btn.classList.add("active");
+
+      if (tabName === "create") {
+        resetCreateForm();
+      } else if (tabName === "map") {
+        renderMapTab();
+      } else if (tabName === "account") {
+        renderAccountTab();
+      } else {
+        renderItineraryTab();
+      }
+    }
+
+    function resetCreateForm() {
+      document.getElementById("createCityInput").value = "";
+      document.getElementById("createTitleInput").value = "";
+      document.getElementById("cityAutocomplete").classList.remove("visible");
+      const today = formatDate(new Date());
+      rangeStart = today;
+      rangeEnd = addDays(today, 1);
+      const d = parseDate(rangeStart);
+      calYear = d.getFullYear();
+      calMonth = d.getMonth();
+      updateRangeSummaryUI();
+      renderRangeCalendar();
+    }
+
+    function updateRangeSummaryUI() {
+      document.getElementById("rangeStartLabel").textContent = rangeStart;
+      document.getElementById("rangeEndLabel").textContent = rangeEnd;
+      const nights = diffDays(rangeStart, rangeEnd);
+      document.getElementById("rangeNightsBadge").textContent = nights === 0 ? "당일치기" : `${nights}박 ${nights + 1}일`;
+    }
+
+    function toggleRangeCalendar() {
+      const panel = document.getElementById("rangeCalendarPanel");
+      panel.classList.toggle("open");
+      if (panel.classList.contains("open")) renderRangeCalendar();
+    }
+
+    function changeCalMonth(delta) {
+      calMonth += delta;
+      if (calMonth < 0) { calMonth = 11; calYear--; }
+      if (calMonth > 11) { calMonth = 0; calYear++; }
+      renderRangeCalendar();
+    }
+
+    function renderRangeCalendar() {
+      document.getElementById("calMonthLabel").textContent = `${calYear}년 ${calMonth + 1}월`;
+      const grid = document.getElementById("calDaysGrid");
+      grid.innerHTML = "";
+
+      const firstDay = new Date(calYear, calMonth, 1).getDay();
+      const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+
+      for (let i = 0; i < firstDay; i++) {
+        const empty = document.createElement("div");
+        empty.className = "cal-day empty";
+        grid.appendChild(empty);
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${calYear}-${String(calMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+        const cell = document.createElement("div");
+        cell.className = "cal-day";
+        cell.textContent = day;
+
+        if (dateStr === rangeStart) cell.classList.add("selected-start");
+        else if (dateStr === rangeEnd) cell.classList.add("selected-end");
+        else if (rangeStart && rangeEnd && dateStr > rangeStart && dateStr < rangeEnd) {
+          cell.classList.add("in-range");
+        }
+
+        cell.onclick = () => onSelectCalDate(dateStr);
+        grid.appendChild(cell);
+      }
+    }
+
+    let selectingSecond = false;
+    function onSelectCalDate(dateStr) {
+      if (!selectingSecond) {
+        rangeStart = dateStr;
+        rangeEnd = dateStr;
+        selectingSecond = true;
+      } else {
+        if (dateStr < rangeStart) {
+          rangeEnd = rangeStart;
+          rangeStart = dateStr;
+        } else {
+          rangeEnd = dateStr;
+        }
+        if (diffDays(rangeStart, rangeEnd) > 9) {
+          rangeEnd = addDays(rangeStart, 9);
+          showToast("일정은 최대 10일(9박 10일)까지 선택할 수 있습니다.");
+        }
+        selectingSecond = false;
+      }
+      updateRangeSummaryUI();
+      renderRangeCalendar();
+    }
+
+    /* =========================================================
+       6. Autocomplete (Destination & Place)
+       ========================================================= */
+    function normalizeRegionName(input) {
+      const trimmed = input.trim();
+      if (!trimmed) return "";
+      const exact = REGION_CATALOG.find(r => r.short === trimmed || r.full === trimmed || r.full.includes(trimmed));
+      return exact ? exact.full : trimmed;
+    }
+
+    function handleCityInput(val) {
+      const box = document.getElementById("cityAutocomplete");
+      const q = val.trim().toLowerCase();
+      const matches = REGION_CATALOG.filter(r =>
+        !q || r.short.toLowerCase().includes(q) || r.full.toLowerCase().includes(q) || r.desc.toLowerCase().includes(q)
+      );
+      if (matches.length === 0) {
+        box.classList.remove("visible");
+        return;
+      }
+      box.innerHTML = matches.map(r => `
+        <div class="autocomplete-item" onclick="pickRegion('${r.full}')">
+          <span class="ac-name">${r.full}</span>
+          <span class="ac-meta">${r.desc}</span>
         </div>
-        <div class="empty-btns">
-          <button class="btn btn-primary" onclick="setCreateMode('manual'); switchTab('create')">
-            직접 내 여행 일정 만들기
-          </button>
-          <button class="btn btn-sage" onclick="setCreateMode('ai'); switchTab('create')">
-            AI로 새 여행 일정 만들기
-          </button>
-          <button class="btn btn-outline" onclick="openJoinModal()">
-            초대 코드로 동행 일정 합류
-          </button>
+      `).join("");
+      box.classList.add("visible");
+    }
+
+    function pickRegion(fullName) {
+      document.getElementById("createCityInput").value = fullName;
+      document.getElementById("cityAutocomplete").classList.remove("visible");
+      const titleInput = document.getElementById("createTitleInput");
+      if (!titleInput.value.trim()) {
+        titleInput.value = `${fullName} 감성 여행 루트`;
+      }
+    }
+
+    function handlePlaceSearchInput(val) {
+      const box = document.getElementById("placeAutocomplete");
+      const trip = getActiveTrip();
+      const targetCity = trip ? trip.city : "";
+      const q = val.trim().toLowerCase();
+
+      const sorted = [...PLACE_CATALOG].sort((a, b) => {
+        const aMatch = targetCity && a.city.includes(targetCity) ? 0 : 1;
+        const bMatch = targetCity && b.city.includes(targetCity) ? 0 : 1;
+        return aMatch - bMatch;
+      });
+
+      const filtered = sorted.filter(p =>
+        !q || p.name.toLowerCase().includes(q) || p.addr.toLowerCase().includes(q) || p.city.toLowerCase().includes(q)
+      ).slice(0, 8);
+
+      if (filtered.length === 0) {
+        box.classList.remove("visible");
+        return;
+      }
+
+      box.innerHTML = filtered.map(p => `
+        <div class="autocomplete-item" onclick="pickPlace('${p.name.replace(/'/g, "\'")}', '${p.addr.replace(/'/g, "\'")}', '${p.cat}')">
+          <span class="ac-name">${p.name} <small style="color:var(--primary-green);">(${p.cat})</small></span>
+          <span class="ac-meta">${p.addr}</span>
         </div>
-      </div>
-    `;
-    return;
-  }
+      `).join("");
+      box.classList.add("visible");
+    }
 
-  const dayKeys = Object.keys(trip.days).map(Number).sort((a, b) => a - b);
-  if (!dayKeys.includes(state.activeDay)) state.activeDay = dayKeys[0] || 1;
-  const stops = trip.days[state.activeDay] || [];
+    function pickPlace(name, addr, cat) {
+      document.getElementById("stopSearchInput").value = name;
+      document.getElementById("stopAddressInput").value = addr;
+      document.getElementById("stopCategorySelect").value = cat;
+      document.getElementById("placeAutocomplete").classList.remove("visible");
+    }
 
-  const switcherHtml = `
-    <div class="switcher-wrap">
-      <div class="switcher-label">
-        <span>저장된 일정 ${state.trips.length}개</span>
-        <span style="color:var(--green);cursor:pointer;" onclick="setCreateMode('manual'); switchTab('create')">+ 새 일정</span>
-      </div>
-      <div class="trip-chips">
-        ${state.trips.map(t => `
-          <button class="trip-chip ${t.id === trip.id ? 'active' : ''}" onclick="selectTrip('${t.id}')">
-            ${escapeHtml(t.city)} · ${escapeHtml(t.title)}
-          </button>
-        `).join('')}
-      </div>
-    </div>
-  `;
+    /* =========================================================
+       7. Create Trip & Edit Stops
+       ========================================================= */
+    async function createNewTrip() {
+      const rawCity = document.getElementById("createCityInput").value;
+      const city = normalizeRegionName(rawCity);
+      if (!city) {
+        showToast("여행지를 먼저 입력하거나 선택해 주세요.");
+        return;
+      }
+      const title = document.getElementById("createTitleInput").value.trim() || `${city} 여행 일정`;
+      const people = document.getElementById("createPeopleSelect").value;
+      const totalDays = diffDays(rangeStart, rangeEnd) + 1;
 
-  const bannerHtml = `
-    <div class="route-banner">
-      <div class="route-banner-top">
-        <div>
-          <div class="route-city">${escapeHtml(trip.city)} · ${escapeHtml(trip.people)}</div>
-          <div class="route-name">${escapeHtml(trip.title)}</div>
-          <div class="route-dates">${escapeHtml(trip.start)} ~ ${escapeHtml(trip.end)}</div>
+      const daysObj = {};
+      for (let i = 1; i <= totalDays; i++) {
+        daysObj[i] = [];
+      }
+
+      const ownerId = currentUser ? currentUser.user_id : "guest";
+      const ownerName = currentUser ? currentUser.nickname : "게스트";
+
+      const newTrip = {
+        id: "trip_" + Date.now(),
+        ownerId,
+        memberIds: [ownerId],
+        members: [{ userId: ownerId, nickname: ownerName, role: "방장" }],
+        title,
+        city,
+        startDate: rangeStart,
+        endDate: rangeEnd,
+        people,
+        days: daysObj,
+        lastEditor: ownerName,
+        updatedAt: new Date().toISOString()
+      };
+
+      appState.trips.unshift(newTrip);
+      appState.activeTripId = newTrip.id;
+      appState.activeDay = 1;
+      saveLocalState();
+      await pushTripToSupabase(newTrip);
+
+      showToast(`'${title}' 일정이 생성되었습니다!`);
+      switchTab("itinerary");
+    }
+
+    function openStopModal(index = null) {
+      const trip = getActiveTrip();
+      if (!trip) return;
+      if (!canEditTrip(trip)) {
+        showToast("초대된 동행자만 일정을 편집할 수 있습니다.");
+        return;
+      }
+
+      editingStopIndex = index;
+      document.getElementById("stopCityHint").textContent = trip.city;
+      document.getElementById("placeAutocomplete").classList.remove("visible");
+
+      if (index !== null) {
+        const stop = (trip.days[appState.activeDay] || [])[index];
+        document.getElementById("stopModalTitle").textContent = "장소 수정";
+        document.getElementById("stopSearchInput").value = stop.name || "";
+        document.getElementById("stopAddressInput").value = stop.addr || "";
+        document.getElementById("stopTimeInput").value = stop.time || "10:30";
+        document.getElementById("stopCategorySelect").value = stop.cat || "명소";
+        document.getElementById("stopMemoInput").value = stop.memo || "";
+      } else {
+        document.getElementById("stopModalTitle").textContent = `Day ${appState.activeDay} 장소 추가`;
+        document.getElementById("stopSearchInput").value = "";
+        document.getElementById("stopAddressInput").value = "";
+        document.getElementById("stopTimeInput").value = "11:00";
+        document.getElementById("stopCategorySelect").value = "명소";
+        document.getElementById("stopMemoInput").value = "";
+      }
+
+      document.getElementById("stopModal").classList.add("open");
+    }
+
+    function closeStopModal() {
+      document.getElementById("stopModal").classList.remove("open");
+    }
+
+    async function saveStopFromModal() {
+      const trip = getActiveTrip();
+      if (!trip || !canEditTrip(trip)) return;
+
+      const name = document.getElementById("stopSearchInput").value.trim();
+      if (!name) {
+        showToast("장소명을 입력해 주세요.");
+        return;
+      }
+
+      const stopData = {
+        name,
+        addr: document.getElementById("stopAddressInput").value.trim() || trip.city,
+        time: document.getElementById("stopTimeInput").value || "10:00",
+        cat: document.getElementById("stopCategorySelect").value,
+        memo: document.getElementById("stopMemoInput").value.trim()
+      };
+
+      if (!trip.days[appState.activeDay]) trip.days[appState.activeDay] = [];
+
+      if (editingStopIndex !== null) {
+        trip.days[appState.activeDay][editingStopIndex] = stopData;
+      } else {
+        trip.days[appState.activeDay].push(stopData);
+      }
+
+      trip.updatedAt = new Date().toISOString();
+      trip.lastEditor = currentUser ? currentUser.nickname : "게스트";
+
+      saveLocalState();
+      closeStopModal();
+      renderItineraryTab();
+      await pushTripToSupabase(trip);
+      showToast("일정이 저장되었습니다.");
+    }
+
+    async function removeStop(index) {
+      const trip = getActiveTrip();
+      if (!trip || !canEditTrip(trip)) return;
+      trip.days[appState.activeDay].splice(index, 1);
+      trip.updatedAt = new Date().toISOString();
+      saveLocalState();
+      renderItineraryTab();
+      await pushTripToSupabase(trip);
+      showToast("장소가 삭제되었습니다.");
+    }
+
+    async function moveStop(index, dir) {
+      const trip = getActiveTrip();
+      if (!trip || !canEditTrip(trip)) return;
+      const list = trip.days[appState.activeDay];
+      const target = index + dir;
+      if (target < 0 || target >= list.length) return;
+      [list[index], list[target]] = [list[target], list[index]];
+      trip.updatedAt = new Date().toISOString();
+      saveLocalState();
+      renderItineraryTab();
+      await pushTripToSupabase(trip);
+    }
+
+    /* =========================================================
+       8. Friend Invite & Notification Center
+       ========================================================= */
+    function openInviteModal() {
+      if (!currentUser) {
+        showToast("친구 초대를 위해 먼저 내 계정 탭에서 로그인해 주세요.");
+        switchTab("account");
+        return;
+      }
+      document.getElementById("inviteCodeInput").value = "";
+      document.getElementById("inviteModal").classList.add("open");
+    }
+
+    function closeInviteModal() {
+      document.getElementById("inviteModal").classList.remove("open");
+    }
+
+    async function sendTripInvite() {
+      const code = document.getElementById("inviteCodeInput").value.trim().toUpperCase();
+      if (code.length < 4) {
+        showToast("4자리 친구 초대코드를 입력해 주세요.");
+        return;
+      }
+      if (currentUser && code === currentUser.code) {
+        showToast("본인 초대코드는 입력할 수 없습니다.");
+        return;
+      }
+
+      const trip = getActiveTrip();
+      if (!trip) return;
+
+      try {
+        const users = await sbRequest(`/tripic_users?code=eq.${encodeURIComponent(code)}`);
+        if (!Array.isArray(users) || users.length === 0) {
+          showToast("해당 초대코드의 회원을 찾을 수 없습니다.");
+          return;
+        }
+        const targetUser = users[0];
+        const notifPayload = {
+          id: "notif_" + Date.now(),
+          to_user_id: targetUser.user_id,
+          to_code: targetUser.code,
+          from_user_id: currentUser.user_id,
+          from_name: currentUser.nickname,
+          trip_id: trip.id,
+          trip_title: trip.title,
+          trip_snapshot: trip,
+          status: "pending",
+          is_read: false,
+          created_at: new Date().toISOString()
+        };
+
+        await sbRequest("/tripic_notifications", {
+          method: "POST",
+          body: JSON.stringify(notifPayload)
+        });
+
+        closeInviteModal();
+        showToast(`${targetUser.nickname}님에게 동행 초대를 보냈습니다!`);
+      } catch (e) {
+        showToast(`초대 전송 실패: ${e.message}`);
+      }
+    }
+
+    function showInviteBanner(text) {
+      document.getElementById("inviteToastText").textContent = text;
+      document.getElementById("inviteToastBanner").classList.add("visible");
+    }
+
+    function dismissInviteBanner() {
+      document.getElementById("inviteToastBanner").classList.remove("visible");
+    }
+
+    function openNotifModal() {
+      dismissInviteBanner();
+      renderNotificationList();
+      document.getElementById("notifModal").classList.add("open");
+    }
+
+    function closeNotifModal() {
+      document.getElementById("notifModal").classList.remove("open");
+    }
+
+    async function respondInvite(notifId, accept) {
+      const notif = appState.notifications.find(n => n.id === notifId);
+      if (!notif) return;
+
+      notif.status = accept ? "accepted" : "declined";
+      notif.is_read = true;
+
+      try {
+        await sbRequest(`/tripic_notifications?id=eq.${encodeURIComponent(notifId)}`, {
+          method: "PATCH",
+          body: JSON.stringify({ status: notif.status, is_read: true })
+        });
+
+        if (accept && currentUser) {
+          const remoteTrips = await sbRequest(`/tripic_trips?id=eq.${encodeURIComponent(notif.trip_id)}`);
+          const baseTrip = (Array.isArray(remoteTrips) && remoteTrips[0]) ? remoteTrips[0] : notif.trip_snapshot;
+
+          if (baseTrip) {
+            const memberIds = Array.isArray(baseTrip.member_ids || baseTrip.memberIds)
+              ? [...(baseTrip.member_ids || baseTrip.memberIds)]
+              : [baseTrip.owner_id || baseTrip.ownerId];
+            if (!memberIds.includes(currentUser.user_id)) {
+              memberIds.push(currentUser.user_id);
+            }
+
+            const members = Array.isArray(baseTrip.members) ? [...baseTrip.members] : [];
+            if (!members.some(m => m.userId === currentUser.user_id)) {
+              members.push({ userId: currentUser.user_id, nickname: currentUser.nickname, role: "동행 편집자" });
+            }
+
+            const joinedTrip = {
+              id: baseTrip.id,
+              ownerId: baseTrip.owner_id || baseTrip.ownerId,
+              memberIds,
+              members,
+              title: baseTrip.title,
+              city: baseTrip.city,
+              startDate: baseTrip.start_date || baseTrip.startDate,
+              endDate: baseTrip.end_date || baseTrip.endDate,
+              people: baseTrip.people || "2명 (커플/친구)",
+              days: baseTrip.days || {},
+              lastEditor: currentUser.nickname,
+              updatedAt: new Date().toISOString()
+            };
+
+            const existingIdx = appState.trips.findIndex(t => t.id === joinedTrip.id);
+            if (existingIdx >= 0) appState.trips[existingIdx] = joinedTrip;
+            else appState.trips.unshift(joinedTrip);
+
+            appState.activeTripId = joinedTrip.id;
+            await pushTripToSupabase(joinedTrip);
+            showToast(`'${joinedTrip.title}' 일정에 합류했습니다!`);
+          }
+        } else {
+          showToast("초대를 거절했습니다.");
+        }
+      } catch (e) {
+        showToast(`처리 중 오류: ${e.message}`);
+      }
+
+      saveLocalState();
+      renderAll();
+      renderNotificationList();
+    }
+
+    async function markAllNotificationsRead() {
+      appState.notifications.forEach(n => n.is_read = true);
+      saveLocalState();
+      updateBellBadge();
+      renderNotificationList();
+      if (currentUser) {
+        try {
+          await sbRequest(`/tripic_notifications?to_code=eq.${encodeURIComponent(currentUser.code)}`, {
+            method: "PATCH",
+            body: JSON.stringify({ is_read: true })
+          });
+        } catch (e) {}
+      }
+    }
+
+    function updateBellBadge() {
+      const unreadCount = appState.notifications.filter(n => !n.is_read).length;
+      const badge = document.getElementById("bellBadge");
+      badge.textContent = unreadCount;
+      if (unreadCount > 0) badge.classList.add("visible");
+      else badge.classList.remove("visible");
+    }
+
+    function renderNotificationList() {
+      const container = document.getElementById("notifListContainer");
+      if (appState.notifications.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding:28px 0; color:var(--text-sub); font-size:13px;">도착한 알림이 없습니다.</div>`;
+        return;
+      }
+
+      container.innerHTML = appState.notifications.map(n => `
+        <div class="notif-item ${n.is_read ? "" : "unread"}">
+          <div style="font-size:13.5px; font-weight:700; margin-bottom:4px;">
+            ${n.from_name}님의 동행 초대
+          </div>
+          <div style="font-size:12.5px; color:var(--text-sub); margin-bottom:8px;">
+            '${n.trip_title}' 일정에 함께 편집자로 초대되었습니다.
+          </div>
+          ${n.status === "pending" ? `
+            <div style="display:flex; gap:8px;">
+              <button type="button" class="btn btn-sm btn-primary" onclick="respondInvite('${n.id}', true)">수락하고 합류</button>
+              <button type="button" class="btn btn-sm btn-outline" onclick="respondInvite('${n.id}', false)">거절</button>
+            </div>
+          ` : `
+            <span style="font-size:11.5px; font-weight:600; color:var(--primary-green);">
+              ${n.status === "accepted" ? "✓ 수락 완료" : "✕ 거절됨"}
+            </span>
+          `}
         </div>
-      </div>
-      <div class="collab-bar">
-        <div class="member-avatars">
-          ${trip.members.map(m => `<span class="member-tag">${ICONS.user} ${escapeHtml(m)}</span>`).join('')}
-        </div>
-        <button class="invite-mini-btn" onclick="openInviteModal()">+ 동행자 초대</button>
-      </div>
-    </div>
-  `;
+      `).join("");
+    }
 
-  const toolbarHtml = `
-    <div class="toolbar">
-      <div class="day-tabs">
-        ${dayKeys.map(d => `
-          <button class="day-tab ${d === state.activeDay ? 'active' : ''}" onclick="selectDay(${d})">DAY ${d}</button>
-        `).join('')}
-      </div>
-      <div class="view-toggle">
-        <button class="view-btn ${state.viewMode === 'timeline' ? 'active' : ''}" onclick="setViewMode('timeline')">타임라인</button>
-        <button class="view-btn ${state.viewMode === 'map' ? 'active' : ''}" onclick="setViewMode('map')">경로지도</button>
-      </div>
-    </div>
-  `;
+    /* =========================================================
+       9. Account Auth (Sign Up / Login / Logout)
+       ========================================================= */
+    function generateInviteCode() {
+      return String(Math.floor(1000 + Math.random() * 9000));
+    }
 
-  let bodyHtml = '';
-  if (state.viewMode === 'map') {
-    bodyHtml = `
-      <div class="map-box">
-        <canvas id="routeCanvas" width="760" height="520"></canvas>
-        <div style="font-size:12px;color:var(--muted);margin-top:8px;text-align:center;">
-          DAY ${state.activeDay} 동선 시각화 · 총 ${stops.length}개 경유지
-        </div>
-      </div>
-    `;
-  }
+    async function handleRegister() {
+      const userId = document.getElementById("authIdInput").value.trim();
+      const pw = document.getElementById("authPwInput").value.trim();
+      const nickname = document.getElementById("authNickInput").value.trim();
 
-  if (stops.length === 0) {
-    bodyHtml += `
-      <div class="card" style="text-align:center;padding:28px 16px;">
-        <div class="empty-icon" style="width:48px;height:48px;border-radius:14px;margin-bottom:10px;">${ICONS.pin}</div>
-        <div style="font-weight:800;font-size:15px;margin-bottom:6px;">DAY ${state.activeDay} 일정이 비어 있어요</div>
-        <div style="font-size:13px;color:var(--muted);margin-bottom:16px;">가고 싶은 맛집, 카페, 명소를 직접 추가해 보세요.</div>
-        <button class="btn btn-primary" onclick="openAddStopModal()">+ 장소 직접 추가하기</button>
-      </div>
-    `;
-  } else {
-    bodyHtml += `
-      <div class="hint-bar">
-        <span>카드를 1초 길게 누르면 맨 위/아래로 이동</span>
-        <span>${stops.length}곳</span>
-      </div>
-      ${stops.map((s, idx) => `
-        <div class="stop-card"
-             onpointerdown="startPress(event, ${idx})"
-             onpointerup="cancelPress()"
-             onpointerleave="cancelPress()"
-             onpointercancel="cancelPress()">
-          <div class="stop-top">
-            <div class="stop-num">${idx + 1}</div>
-            <div class="stop-info">
-              <div class="stop-cat">${escapeHtml(s.cat)} · ${escapeHtml(s.time)} (${escapeHtml(s.duration)})</div>
-              <div class="stop-title">${escapeHtml(s.name)}</div>
-              <div class="stop-meta">${escapeHtml(s.desc || '')}</div>
-              ${s.memo ? `<div class="stop-memo-preview">${escapeHtml(s.memo)}</div>` : ''}
+      if (!userId || !pw || !nickname) {
+        showToast("아이디, 비밀번호, 닉네임을 모두 입력해 주세요.");
+        return;
+      }
+
+      const code = generateInviteCode();
+      try {
+        await sbRequest("/tripic_users", {
+          method: "POST",
+          body: JSON.stringify({
+            user_id: userId,
+            pw,
+            nickname,
+            code,
+            created_at: new Date().toISOString()
+          })
+        });
+
+        currentUser = { user_id: userId, nickname, code };
+        localStorage.setItem("tripic_current_user", JSON.stringify(currentUser));
+        loadLocalState();
+        await syncWithSupabase(false);
+        renderAll();
+        showToast(`${nickname}님 환영합니다! (초대코드: ${code})`);
+      } catch (e) {
+        showToast(`회원가입 실패: ${e.message}`);
+      }
+    }
+
+    async function handleLogin() {
+      const userId = document.getElementById("authIdInput").value.trim();
+      const pw = document.getElementById("authPwInput").value.trim();
+      if (!userId || !pw) {
+        showToast("아이디와 비밀번호를 입력해 주세요.");
+        return;
+      }
+
+      try {
+        const users = await sbRequest(`/tripic_users?user_id=eq.${encodeURIComponent(userId)}&pw=eq.${encodeURIComponent(pw)}`);
+        if (!Array.isArray(users) || users.length === 0) {
+          showToast("아이디 또는 비밀번호가 일치하지 않습니다.");
+          return;
+        }
+        const u = users[0];
+        currentUser = { user_id: u.user_id, nickname: u.nickname, code: u.code };
+        localStorage.setItem("tripic_current_user", JSON.stringify(currentUser));
+        loadLocalState();
+        await syncWithSupabase(false);
+        renderAll();
+        showToast(`${u.nickname}님으로 로그인되었습니다.`);
+      } catch (e) {
+        showToast(`로그인 오류: ${e.message}`);
+      }
+    }
+
+    function handleLogout() {
+      currentUser = null;
+      localStorage.removeItem("tripic_current_user");
+      loadLocalState();
+      renderAll();
+      showToast("로그아웃되었습니다. 게스트 공간으로 전환됩니다.");
+    }
+
+    /* =========================================================
+       10. Renderers (Itinerary, Map, Account)
+       ========================================================= */
+    function renderAll() {
+      document.getElementById("headerUserLabel").textContent = currentUser ? currentUser.nickname : "게스트";
+      updateBellBadge();
+      renderItineraryTab();
+      renderMapTab();
+      renderAccountTab();
+    }
+
+    function renderItineraryTab() {
+      const selectorWrap = document.getElementById("tripSwitcherWrap");
+      const selector = document.getElementById("tripSelector");
+      const container = document.getElementById("itineraryContent");
+
+      if (appState.trips.length > 1) {
+        selectorWrap.style.display = "block";
+        selector.innerHTML = appState.trips.map(t =>
+          `<option value="${t.id}" ${t.id === appState.activeTripId ? "selected" : ""}>${t.title} (${t.city})</option>`
+        ).join("");
+      } else {
+        selectorWrap.style.display = "none";
+      }
+
+      const trip = getActiveTrip();
+      if (!trip) {
+        container.innerHTML = `<div class="section-card">아직 생성된 여행 일정이 없습니다.</div>`;
+        return;
+      }
+
+      const editable = canEditTrip(trip);
+      const totalDays = diffDays(trip.startDate, trip.endDate) + 1;
+      if (appState.activeDay > totalDays) appState.activeDay = 1;
+
+      const dayStops = trip.days[appState.activeDay] || [];
+
+      let dayPillsHtml = "";
+      for (let d = 1; d <= totalDays; d++) {
+        dayPillsHtml += `<button type="button" class="day-pill ${d === appState.activeDay ? "active" : ""}" onclick="selectDay(${d})">Day ${d}</button>`;
+      }
+
+      const membersHtml = (trip.members || []).map(m => `<span class="member-chip">${m.nickname}</span>`).join("");
+
+      const stopsHtml = dayStops.length === 0
+        ? `<div class="section-card" style="text-align:center; padding:28px 16px; color:var(--text-sub); font-size:13.5px;">
+            Day ${appState.activeDay} 일정이 비어 있습니다.<br/>아래 버튼을 눌러 장소를 추가해 보세요.
+           </div>`
+        : dayStops.map((s, idx) => `
+          <div class="stop-card">
+            <div class="stop-order">${idx + 1}</div>
+            <div class="stop-body">
+              <div class="stop-top">
+                <div class="stop-name">${s.name}</div>
+                <span class="stop-cat">${s.cat} · ${s.time}</span>
+              </div>
+              <div class="stop-addr">${s.addr}</div>
+              ${s.memo ? `<div class="stop-memo">📝 ${s.memo}</div>` : ""}
+              ${editable ? `
+                <div class="stop-actions">
+                  <button type="button" class="btn btn-sm btn-outline" onclick="openStopModal(${idx})">수정</button>
+                  <button type="button" class="btn btn-sm btn-outline" onclick="moveStop(${idx}, -1)">↑</button>
+                  <button type="button" class="btn btn-sm btn-outline" onclick="moveStop(${idx}, 1)">↓</button>
+                  <button type="button" class="btn btn-sm btn-danger" onclick="removeStop(${idx})">삭제</button>
+                </div>
+              ` : ""}
             </div>
           </div>
-          <div class="stop-actions">
-            <button class="mini-act" onclick="openDetailModal(${idx})">상세 · 메모</button>
-            <button class="mini-act" onclick="replaceStop(${idx})">장소 교체</button>
-            <button class="mini-act del" onclick="confirmDeleteStop(${idx})">삭제</button>
+        `).join("");
+
+      container.innerHTML = `
+        <div class="trip-hero">
+          <div class="trip-hero-top">
+            <div>
+              <div class="trip-hero-city">📍 ${trip.city}</div>
+              <div class="trip-hero-title">${trip.title}</div>
+              <div class="trip-hero-meta">
+                <span>${trip.startDate} ~ ${trip.endDate}</span>
+                <span>· ${trip.people}</span>
+              </div>
+            </div>
+            <button type="button" class="btn btn-sm" style="background:rgba(255,255,255,0.18); color:#FFFFFF;" onclick="openInviteModal()">+ 친구 초대</button>
           </div>
-        </div>
-      `).join('')}
-      <button class="btn btn-sage" style="margin-top:6px;" onclick="openAddStopModal()">+ DAY ${state.activeDay}에 장소 추가</button>
-    `;
-  }
-
-  container.innerHTML = switcherHtml + bannerHtml + toolbarHtml + bodyHtml;
-  if (state.viewMode === 'map') drawRouteCanvas(stops, trip.city);
-}
-
-function selectTrip(id) {
-  state.activeTripId = id;
-  state.activeDay = 1;
-  saveState();
-  renderRouteTab();
-}
-
-function selectDay(d) {
-  state.activeDay = d;
-  renderRouteTab();
-}
-
-function setViewMode(m) {
-  state.viewMode = m;
-  renderRouteTab();
-}
-
-/* Long Press 1s Move Top/Bottom */
-let pressTimer = null;
-function startPress(e, idx) {
-  if (e.target.closest('button')) return;
-  const card = e.currentTarget;
-  card.classList.add('pressing');
-  pressTimer = setTimeout(() => {
-    card.classList.remove('pressing');
-    openMoveModal(idx);
-  }, 900);
-}
-function cancelPress() {
-  clearTimeout(pressTimer);
-  document.querySelectorAll('.stop-card.pressing').forEach(c => c.classList.remove('pressing'));
-}
-
-function openMoveModal(idx) {
-  const trip = getActiveTrip();
-  const stops = trip.days[state.activeDay];
-  const item = stops[idx];
-  openModal(`
-    <div class="modal-title">순서 빠른 이동</div>
-    <p style="font-size:13.5px;color:var(--muted);margin-bottom:16px;">
-      <strong>${escapeHtml(item.name)}</strong> 일정을 어디로 이동할까요?
-    </p>
-    <div style="display:flex;flex-direction:column;gap:9px;">
-      <button class="btn btn-primary" onclick="moveStop(${idx}, 'top')">맨 위로 이동 (1번 순서)</button>
-      <button class="btn btn-sage" onclick="moveStop(${idx}, 'bottom')">맨 아래로 이동 (마지막 순서)</button>
-      <button class="btn btn-outline" onclick="closeModal()">취소</button>
-    </div>
-  `);
-}
-
-function moveStop(idx, dir) {
-  const trip = getActiveTrip();
-  const stops = trip.days[state.activeDay];
-  const [picked] = stops.splice(idx, 1);
-  if (dir === 'top') stops.unshift(picked);
-  else stops.push(picked);
-  saveState();
-  closeModal();
-  renderRouteTab();
-  showToast(dir === 'top' ? '맨 위로 이동했습니다.' : '맨 아래로 이동했습니다.');
-}
-
-function openAddStopModal() {
-  openModal(`
-    <div class="modal-title">DAY ${state.activeDay} 장소 추가</div>
-    <div class="field">
-      <label>장소 이름 *</label>
-      <input class="input" id="newStopName" placeholder="예: 성수동 카페거리" />
-    </div>
-    <div class="row-2">
-      <div class="field">
-        <label>카테고리</label>
-        <select id="newStopCat">
-          <option value="맛집 탐방">맛집 탐방</option>
-          <option value="감성 카페">감성 카페</option>
-          <option value="명소/산책">명소/산책</option>
-          <option value="쇼핑/소품샵">쇼핑/소품샵</option>
-          <option value="숙소/휴식">숙소/휴식</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>방문 시간</label>
-        <input class="input" id="newStopTime" value="14:00" />
-      </div>
-    </div>
-    <div class="field">
-      <label>간단 설명</label>
-      <input class="input" id="newStopDesc" placeholder="예: 웨이팅 맛집, 창가 자리 추천" />
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeModal()">취소</button>
-      <button class="btn btn-primary" onclick="addStop()">추가하기</button>
-    </div>
-  `);
-}
-
-function addStop() {
-  const name = (document.getElementById('newStopName').value || '').trim();
-  if (!name) { showToast('장소 이름을 입력해 주세요.'); return; }
-  const trip = getActiveTrip();
-  trip.days[state.activeDay].push({
-    id: 'sp_' + Date.now(),
-    name,
-    cat: document.getElementById('newStopCat').value,
-    time: document.getElementById('newStopTime').value || '14:00',
-    duration: '1시간 30분',
-    desc: document.getElementById('newStopDesc').value || '직접 추가한 여행 장소',
-    memo: ''
-  });
-  saveState();
-  closeModal();
-  renderRouteTab();
-  showToast('새 장소가 추가되었습니다.');
-}
-
-function replaceStop(idx) {
-  const trip = getActiveTrip();
-  const pool = SPOT_POOL[trip.city] || SPOT_POOL['기본'];
-  const currentName = trip.days[state.activeDay][idx].name;
-  const candidates = pool.filter(p => p.name !== currentName);
-  const pick = candidates[Math.floor(Math.random() * candidates.length)] || pool[0];
-  trip.days[state.activeDay][idx] = {
-    ...trip.days[state.activeDay][idx],
-    name: pick.name,
-    cat: pick.cat,
-    desc: pick.desc
-  };
-  saveState();
-  renderRouteTab();
-  showToast(`'${pick.name}'(으)로 교체되었습니다.`);
-}
-
-function confirmDeleteStop(idx) {
-  const trip = getActiveTrip();
-  const item = trip.days[state.activeDay][idx];
-  openModal(`
-    <div class="modal-title">일정 삭제 확인</div>
-    <p style="font-size:14px;color:var(--muted);line-height:1.5;">
-      <strong>${escapeHtml(item.name)}</strong> 장소를 일정에서 삭제할까요?
-    </p>
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeModal()">취소</button>
-      <button class="btn btn-danger" onclick="deleteStop(${idx})">삭제하기</button>
-    </div>
-  `);
-}
-
-function deleteStop(idx) {
-  const trip = getActiveTrip();
-  trip.days[state.activeDay].splice(idx, 1);
-  saveState();
-  closeModal();
-  renderRouteTab();
-  showToast('장소가 삭제되었습니다.');
-}
-
-function openDetailModal(idx) {
-  const trip = getActiveTrip();
-  const item = trip.days[state.activeDay][idx];
-  openModal(`
-    <div class="modal-title">${escapeHtml(item.name)}</div>
-    <div style="font-size:12.5px;color:var(--green);font-weight:700;margin-bottom:8px;">
-      ${escapeHtml(item.cat)} · ${escapeHtml(item.time)} (${escapeHtml(item.duration)})
-    </div>
-    <p style="font-size:13.5px;color:var(--muted);line-height:1.5;margin-bottom:14px;">
-      ${escapeHtml(item.desc)}
-    </p>
-    <div class="field">
-      <label>나만의 간단 메모 (예약번호, 준비물, 팁 등)</label>
-      <textarea id="stopMemoInput" rows="3" placeholder="이 장소에 대한 메모를 남겨보세요...">${escapeHtml(item.memo || '')}</textarea>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeModal()">닫기</button>
-      <button class="btn btn-primary" onclick="saveStopMemo(${idx})">메모 저장</button>
-    </div>
-  `);
-}
-
-function saveStopMemo(idx) {
-  const trip = getActiveTrip();
-  trip.days[state.activeDay][idx].memo = document.getElementById('stopMemoInput').value.trim();
-  saveState();
-  closeModal();
-  renderRouteTab();
-  showToast('메모가 저장되었습니다.');
-}
-
-/* Vector Route Map */
-function drawRouteCanvas(stops, city) {
-  setTimeout(() => {
-    const canvas = document.getElementById('routeCanvas');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const W = canvas.width, H = canvas.height;
-    ctx.clearRect(0, 0, W, H);
-
-    ctx.fillStyle = '#E6EFE8';
-    ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = '#D7E7DC';
-    ctx.beginPath();
-    ctx.arc(W * 0.85, H * 0.2, 160, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(W * 0.14, H * 0.85, 130, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.strokeStyle = 'rgba(255,255,255,0.65)';
-    ctx.lineWidth = 4;
-    for (let x = 90; x < W; x += 140) {
-      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + 30, H); ctx.stroke();
-    }
-    for (let y = 80; y < H; y += 120) {
-      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y - 20); ctx.stroke();
-    }
-
-    ctx.fillStyle = 'rgba(49, 92, 76, 0.14)';
-    ctx.font = '800 34px sans-serif';
-    ctx.fillText(city + ' MAP', 26, 48);
-
-    if (!stops.length) {
-      ctx.fillStyle = '#315C4C';
-      ctx.font = '700 22px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('장소를 추가하면 이동 경로가 지도에 표시됩니다', W / 2, H / 2);
-      ctx.textAlign = 'left';
-      return;
-    }
-
-    const pts = stops.map((_, i) => {
-      const t = stops.length === 1 ? 0.5 : i / (stops.length - 1);
-      const x = 110 + t * (W - 220);
-      const y = H * 0.5 + Math.sin(i * 1.45) * 105;
-      return { x, y };
-    });
-
-    ctx.save();
-    ctx.strokeStyle = '#315C4C';
-    ctx.lineWidth = 6;
-    ctx.setLineDash([12, 10]);
-    ctx.beginPath();
-    pts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
-    ctx.stroke();
-    ctx.restore();
-
-    pts.forEach((p, i) => {
-      ctx.fillStyle = i === pts.length - 1 ? '#00B86B' : '#315C4C';
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, 22, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = '#FFFFFF';
-      ctx.lineWidth = 4;
-      ctx.stroke();
-
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = '800 18px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(String(i + 1), p.x, p.y + 6);
-
-      const label = stops[i].name.length > 11 ? stops[i].name.slice(0, 11) + '…' : stops[i].name;
-      ctx.font = '700 16px sans-serif';
-      const tw = ctx.measureText(label).width + 24;
-      const ly = p.y > H * 0.55 ? p.y - 52 : p.y + 32;
-      ctx.fillStyle = '#FFFFFF';
-      ctx.beginPath();
-      ctx.roundRect(p.x - tw / 2, ly, tw, 30, 10);
-      ctx.fill();
-      ctx.fillStyle = '#1E2421';
-      ctx.fillText(label, p.x, ly + 20);
-    });
-    ctx.textAlign = 'left';
-  }, 20);
-}
-
-/* Invite & Join */
-function getMyCode() {
-  return state.currentUser ? state.currentUser.code : state.guestCode;
-}
-
-function openInviteModal() {
-  const trip = getActiveTrip();
-  if (!trip) return;
-  openModal(`
-    <div class="modal-title">동행자 초대하기</div>
-    <p style="font-size:13.5px;color:var(--muted);line-height:1.5;">
-      친구에게 내 4자리 초대 코드를 공유하거나, 친구의 4자리 코드를 입력해 일정에 바로 초대하세요.
-    </p>
-    <div class="code-box">
-      <div style="font-size:12px;font-weight:700;color:var(--green);">내 4자리 초대 코드</div>
-      <div class="code-val">${getMyCode()}</div>
-      <button class="btn btn-sage btn-sm" style="margin:0 auto;" onclick="copyText('${getMyCode()}')">코드 복사하기</button>
-    </div>
-    <div class="field">
-      <label>동행자 4자리 코드 입력</label>
-      <input class="input" id="inviteCodeInp" maxlength="4" placeholder="예: A7K9" style="text-transform:uppercase;letter-spacing:0.15em;font-weight:800;" />
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeModal()">닫기</button>
-      <button class="btn btn-primary" onclick="inviteByCode()">동행자 추가</button>
-    </div>
-  `);
-}
-
-function inviteByCode() {
-  const code = (document.getElementById('inviteCodeInp').value || '').trim().toUpperCase();
-  if (code.length !== 4) { showToast('4자리 영문/숫자 코드를 입력해 주세요.'); return; }
-  const trip = getActiveTrip();
-  const found = state.users.find(u => u.code === code);
-  const label = found ? found.nickname : `동행자(${code})`;
-  if (!trip.members.includes(label)) {
-    trip.members.push(label);
-    saveState();
-  }
-  closeModal();
-  renderRouteTab();
-  showToast(`${label}님이 일정에 초대되었습니다.`);
-}
-
-function openJoinModal() {
-  openModal(`
-    <div class="modal-title">초대 코드로 동행 일정 합류</div>
-    <p style="font-size:13.5px;color:var(--muted);margin-bottom:14px;">
-      동행자에게 받은 4자리 영문/숫자 초대 코드를 입력하면 공유된 여행 루트가 열립니다.
-    </p>
-    <div class="field">
-      <label>4자리 초대 코드</label>
-      <input class="input" id="joinCodeInp" maxlength="4" placeholder="예: TR82" style="text-transform:uppercase;letter-spacing:0.18em;font-weight:800;" />
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeModal()">취소</button>
-      <button class="btn btn-primary" onclick="joinTripByCode()">합류하기</button>
-    </div>
-  `);
-}
-
-function joinTripByCode() {
-  const code = (document.getElementById('joinCodeInp').value || '').trim().toUpperCase();
-  if (code.length !== 4) { showToast('4자리 코드를 정확히 입력해 주세요.'); return; }
-  const me = state.currentUser ? state.currentUser.nickname : '나(게스트)';
-  const sharedTrip = {
-    id: 'trip_shared_' + Date.now(),
-    title: `동행 코드(${code}) 공유 여행`,
-    city: '제주',
-    start: new Date().toISOString().slice(0, 10),
-    end: new Date(Date.now() + 86400000).toISOString().slice(0, 10),
-    people: '2명 (커플/친구)',
-    mode: 'shared',
-    members: [`호스트(${code})`, me],
-    days: {
-      1: SPOT_POOL['제주'].slice(0, 3).map((s, i) => ({ ...s, id: 'sh_' + i, memo: '' })),
-      2: SPOT_POOL['제주'].slice(3, 5).map((s, i) => ({ ...s, id: 'sh2_' + i, memo: '' }))
-    }
-  };
-  state.trips.unshift(sharedTrip);
-  state.activeTripId = sharedTrip.id;
-  state.activeDay = 1;
-  saveState();
-  closeModal();
-  renderRouteTab();
-  showToast('동행 일정에 합류했습니다.');
-}
-
-/* TAB 3: 내 여행 */
-function renderTripsTab() {
-  const el = document.getElementById('tab-trips');
-  if (!state.trips.length) {
-    el.innerHTML = `
-      <div class="empty-box">
-        <div class="empty-icon">${ICONS.folder}</div>
-        <div class="empty-title">저장된 여행이 아직 없어요</div>
-        <div class="empty-desc">일정을 만들면 이곳에 자동 저장되어 언제든 다시 열어볼 수 있어요.</div>
-        <div class="empty-btns">
-          <button class="btn btn-primary" onclick="setCreateMode('manual'); switchTab('create')">직접 새 일정 만들기</button>
-          <button class="btn btn-sage" onclick="setCreateMode('ai'); switchTab('create')">AI 새 일정 만들기</button>
-        </div>
-      </div>
-    `;
-    return;
-  }
-
-  el.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-      <h3 style="font-size:17px;font-weight:800;">내 여행 보관함 (${state.trips.length})</h3>
-      <button class="btn btn-primary btn-sm" onclick="setCreateMode('manual'); switchTab('create')">+ 새 일정</button>
-    </div>
-    ${state.trips.map(t => `
-      <div class="saved-card ${t.id === state.activeTripId ? 'current' : ''}">
-        ${t.id === state.activeTripId ? '<span class="badge-now">현재 보는 일정</span>' : ''}
-        <div style="font-size:12px;color:var(--green);font-weight:700;">${escapeHtml(t.city)} · ${Object.keys(t.days).length}일 코스</div>
-        <div style="font-size:17px;font-weight:800;margin:4px 0;">${escapeHtml(t.title)}</div>
-        <div style="font-size:12.5px;color:var(--muted);margin-bottom:12px;">${escapeHtml(t.start)} ~ ${escapeHtml(t.end)} · 동행 ${t.members.length}명</div>
-        <div style="display:flex;gap:7px;">
-          <button class="btn btn-primary btn-sm" style="flex:1;" onclick="selectTrip('${t.id}'); switchTab('route')">일정 열기</button>
-          <button class="btn btn-sage btn-sm" onclick="openRenameModal('${t.id}')">이름 변경</button>
-          <button class="btn btn-danger btn-sm" onclick="confirmDeleteTrip('${t.id}')">삭제</button>
-        </div>
-      </div>
-    `).join('')}
-  `;
-}
-
-function openRenameModal(id) {
-  const trip = state.trips.find(t => t.id === id);
-  if (!trip) return;
-  openModal(`
-    <div class="modal-title">여행 이름 변경</div>
-    <div class="field">
-      <input class="input" id="renameTripInp" value="${escapeHtml(trip.title)}" />
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeModal()">취소</button>
-      <button class="btn btn-primary" onclick="renameTrip('${id}')">저장</button>
-    </div>
-  `);
-}
-
-function renameTrip(id) {
-  const val = (document.getElementById('renameTripInp').value || '').trim();
-  if (!val) return;
-  const trip = state.trips.find(t => t.id === id);
-  if (trip) trip.title = val;
-  saveState();
-  closeModal();
-  renderTripsTab();
-  showToast('일정 이름이 변경되었습니다.');
-}
-
-function confirmDeleteTrip(id) {
-  const trip = state.trips.find(t => t.id === id);
-  if (!trip) return;
-  openModal(`
-    <div class="modal-title">여행 일정 삭제</div>
-    <p style="font-size:14px;color:var(--muted);"><strong>${escapeHtml(trip.title)}</strong> 일정을 완전히 삭제할까요?</p>
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeModal()">취소</button>
-      <button class="btn btn-danger" onclick="deleteTrip('${id}')">삭제하기</button>
-    </div>
-  `);
-}
-
-function deleteTrip(id) {
-  state.trips = state.trips.filter(t => t.id !== id);
-  if (state.activeTripId === id) {
-    state.activeTripId = state.trips[0] ? state.trips[0].id : null;
-  }
-  saveState();
-  closeModal();
-  renderTripsTab();
-  showToast('일정이 삭제되었습니다.');
-}
-
-/* TAB 4: 내 계정 */
-let authMode = 'login';
-function renderAccountTab() {
-  const el = document.getElementById('tab-account');
-  updateHeaderPill();
-
-  if (state.currentUser) {
-    const u = state.currentUser;
-    el.innerHTML = `
-      <div class="card">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-          <div style="width:48px;height:48px;border-radius:16px;background:var(--sage);color:var(--green);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:20px;">
-            ${escapeHtml(u.nickname[0])}
-          </div>
-          <div>
-            <div style="font-size:18px;font-weight:800;">${escapeHtml(u.nickname)}</div>
-            <div style="font-size:12.5px;color:var(--muted);">아이디: ${escapeHtml(u.userId)}</div>
+          <div class="collab-bar">
+            <div class="member-chips">${membersHtml}</div>
+            <span style="font-size:11px; color:#D2E0D5;">${editable ? "편집 가능" : "열람 전용"}</span>
           </div>
         </div>
 
-        <div class="code-box">
-          <div style="font-size:12px;font-weight:700;color:var(--green);">내 전용 4자리 동행 초대 코드</div>
-          <div class="code-val">${u.code}</div>
-          <button class="btn btn-primary btn-sm" style="margin:0 auto;" onclick="copyText('${u.code}')">코드 복사하기</button>
-        </div>
+        <div class="day-pills">${dayPillsHtml}</div>
+        ${stopsHtml}
+        ${editable ? `<button type="button" class="btn btn-primary btn-block" style="margin-top:6px;" onclick="openStopModal(null)">+ Day ${appState.activeDay} 장소 추가</button>` : ""}
+      `;
+    }
 
-        <div style="display:flex;flex-direction:column;gap:9px;margin-top:16px;">
-          <button class="btn btn-outline" onclick="confirmLogout()">로그아웃</button>
-          <button class="btn btn-danger" onclick="confirmDeleteAccount()">계정 탈퇴</button>
-        </div>
-      </div>
-    `;
-    return;
-  }
+    function selectDay(dayNum) {
+      appState.activeDay = dayNum;
+      saveLocalState();
+      renderItineraryTab();
+    }
 
-  el.innerHTML = `
-    <div class="card">
-      <div class="mode-switch">
-        <button class="mode-btn ${authMode === 'login' ? 'active' : ''}" onclick="authMode='login'; renderAccountTab()">로그인</button>
-        <button class="mode-btn ${authMode === 'signup' ? 'active' : ''}" onclick="authMode='signup'; renderAccountTab()">회원가입</button>
-      </div>
-
-      ${authMode === 'signup' ? `
-        <div class="field">
-          <label>닉네임 (2글자 이상, 한글 초성/단독 모음 불가)</label>
-          <input class="input" id="authNick" placeholder="예: 트립러버" oninput="validateNickname()" />
-          <div class="error-text" id="nickErr"></div>
-        </div>
-      ` : ''}
-
-      <div class="field">
-        <label>아이디</label>
-        <input class="input" id="authId" placeholder="사용할 아이디 입력 (이메일 불필요)" />
-      </div>
-
-      <div class="field">
-        <label>비밀번호</label>
-        <input class="input" type="password" id="authPw" placeholder="비밀번호 입력" />
-      </div>
-
-      <button class="btn btn-primary" onclick="submitAuth()">
-        ${authMode === 'login' ? '아이디로 로그인' : '회원가입 완료'}
-      </button>
-    </div>
-
-    <div class="card">
-      <div style="font-size:13px;font-weight:700;color:var(--green);">비로그인 게스트 초대 코드</div>
-      <div class="code-box" style="margin-bottom:0;">
-        <div class="code-val">${state.guestCode}</div>
-        <button class="btn btn-sage btn-sm" style="margin:0 auto;" onclick="copyText('${state.guestCode}')">코드 복사</button>
-      </div>
-    </div>
-  `;
-}
-
-function validateNickname() {
-  const inp = document.getElementById('authNick');
-  const err = document.getElementById('nickErr');
-  if (!inp || !err) return true;
-  const val = inp.value.trim();
-  const hasJamo = /[ㄱ-ㅎㅏ-ㅣ]/.test(val);
-  if (val.length === 0) {
-    err.classList.remove('show');
-    return false;
-  }
-  if (hasJamo) {
-    err.textContent = '한글 초성이나 단독 모음(ㄱ~ㅎ, ㅏ~ㅣ)은 사용할 수 없습니다.';
-    err.classList.add('show');
-    return false;
-  }
-  if (val.length < 2) {
-    err.textContent = '닉네임은 2글자 이상 입력해 주세요.';
-    err.classList.add('show');
-    return false;
-  }
-  err.classList.remove('show');
-  return true;
-}
-
-function submitAuth() {
-  const userId = (document.getElementById('authId').value || '').trim();
-  const pw = (document.getElementById('authPw').value || '').trim();
-  if (!userId || !pw) { showToast('아이디와 비밀번호를 모두 입력해 주세요.'); return; }
-
-  if (authMode === 'signup') {
-    const nick = (document.getElementById('authNick').value || '').trim();
-    if (!validateNickname() || nick.length < 2) {
-      validateNickname();
-      const err = document.getElementById('nickErr');
-      if (err && !err.textContent) {
-        err.textContent = '닉네임은 2글자 이상 입력해 주세요.';
-        err.classList.add('show');
+    function renderMapTab() {
+      const container = document.getElementById("mapContent");
+      const trip = getActiveTrip();
+      if (!trip) {
+        container.innerHTML = `<div class="section-card">표시할 여행 동선이 없습니다.</div>`;
+        return;
       }
-      return;
+      const stops = trip.days[appState.activeDay] || [];
+      container.innerHTML = `
+        <div class="section-card">
+          <div class="card-title-row">
+            <div>
+              <div class="card-title">${trip.city} · Day ${appState.activeDay} 동선</div>
+              <div class="card-sub">총 ${stops.length}개 경유지 순서 요약</div>
+            </div>
+          </div>
+          <div class="route-visual">
+            ${stops.length === 0 ? `<div style="font-size:13px; color:var(--text-sub);">등록된 장소가 없습니다.</div>` : stops.map((s, i) => `
+              <div class="route-step">
+                <div class="stop-order" style="background:#315C4C; color:#FFFFFF;">${i + 1}</div>
+                <div>
+                  <div style="font-size:14px; font-weight:700;">${s.name} <span style="font-size:11.5px; color:var(--text-sub);">(${s.time})</span></div>
+                  <div style="font-size:12px; color:var(--text-sub);">${s.addr}</div>
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      `;
     }
-    if (state.users.some(u => u.userId === userId)) {
-      showToast('이미 사용 중인 아이디입니다.');
-      return;
+
+    function renderAccountTab() {
+      const container = document.getElementById("accountContent");
+      const cloudHtml = `
+        <div class="section-card">
+          <div class="card-title-row">
+            <div>
+              <div class="card-title">Supabase 클라우드 실시간 연동</div>
+              <div class="card-sub">${syncStatus.label}</div>
+            </div>
+            <button type="button" class="btn btn-sm btn-sage" onclick="syncWithSupabase(true)">지금 동기화</button>
+          </div>
+          <div class="status-box">${syncStatus.detail || "고정 프로젝트에 자동 연결되어 있습니다."}</div>
+        </div>
+      `;
+
+      if (!currentUser) {
+        container.innerHTML = `
+          ${cloudHtml}
+          <div class="section-card">
+            <div class="card-title-row">
+              <div>
+                <div class="card-title">로그인 및 회원가입</div>
+                <div class="card-sub">계정별로 일정이 격리되며 친구 초대가 활성화됩니다</div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="authIdInput">아이디</label>
+              <input type="text" id="authIdInput" class="form-input" placeholder="영문/숫자 아이디" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="authPwInput">비밀번호</label>
+              <input type="password" id="authPwInput" class="form-input" placeholder="비밀번호 입력" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="authNickInput">닉네임 (회원가입 시 입력)</label>
+              <input type="text" id="authNickInput" class="form-input" placeholder="동행자에게 표시될 이름" />
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+              <button type="button" class="btn btn-primary" onclick="handleLogin()">로그인</button>
+              <button type="button" class="btn btn-sage" onclick="handleRegister()">회원가입</button>
+            </div>
+          </div>
+        `;
+      } else {
+        container.innerHTML = `
+          ${cloudHtml}
+          <div class="section-card">
+            <div class="card-title-row">
+              <div>
+                <div class="card-title">${currentUser.nickname} (@${currentUser.user_id})</div>
+                <div class="card-sub">내 초대코드: <strong style="color:var(--primary-green); font-size:15px;">${currentUser.code}</strong></div>
+              </div>
+              <button type="button" class="btn btn-sm btn-danger" onclick="handleLogout()">로그아웃</button>
+            </div>
+            <p style="font-size:12.5px; color:var(--text-sub); line-height:1.5;">
+              친구에게 위 4자리 초대코드를 알려주면 여행 일정에 초대받을 수 있으며, 초대된 인원만 함께 일정을 편집할 수 있습니다.
+            </p>
+          </div>
+        `;
+      }
     }
-    const newUser = { userId, pw, nickname: nick, code: genCode() };
-    state.users.push(newUser);
-    state.currentUser = newUser;
-    saveState();
-    renderAccountTab();
-    showToast(`${nick}님, 가입을 환영합니다.`);
-  } else {
-    const found = state.users.find(u => u.userId === userId && u.pw === pw);
-    if (!found) {
-      showToast('아이디 또는 비밀번호가 일치하지 않습니다.');
-      return;
+
+    /* =========================================================
+       11. Bootstrap App
+       ========================================================= */
+    function initApp() {
+      setTimeout(() => {
+        document.getElementById("splashScreen").classList.add("hidden");
+      }, 1100);
+
+      try {
+        const savedUser = localStorage.getItem("tripic_current_user");
+        if (savedUser) currentUser = JSON.parse(savedUser);
+      } catch (e) {}
+
+      loadLocalState();
+      resetCreateForm();
+      renderAll();
+      syncWithSupabase(false);
+
+      // Periodic background sync for real-time collaborative edits & invites
+      syncTimer = setInterval(() => {
+        if (currentUser) syncWithSupabase(false);
+      }, 8000);
     }
-    state.currentUser = found;
-    saveState();
-    renderAccountTab();
-    showToast(`${found.nickname}님 환영합니다.`);
-  }
-}
 
-function confirmLogout() {
-  openModal(`
-    <div class="modal-title">로그아웃</div>
-    <p style="font-size:14px;color:var(--muted);">현재 계정에서 로그아웃할까요?</p>
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeModal()">취소</button>
-      <button class="btn btn-primary" onclick="logout()">로그아웃</button>
-    </div>
-  `);
-}
-
-function logout() {
-  state.currentUser = null;
-  saveState();
-  closeModal();
-  renderAccountTab();
-  showToast('로그아웃되었습니다.');
-}
-
-function confirmDeleteAccount() {
-  openModal(`
-    <div class="modal-title">계정 탈퇴 확인</div>
-    <p style="font-size:14px;color:var(--muted);line-height:1.5;">
-      탈퇴 시 계정 정보와 개인 초대 코드가 삭제됩니다. 정말 탈퇴하시겠습니까?
-    </p>
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeModal()">취소</button>
-      <button class="btn btn-danger" onclick="deleteAccount()">계정 탈퇴</button>
-    </div>
-  `);
-}
-
-function deleteAccount() {
-  if (state.currentUser) {
-    state.users = state.users.filter(u => u.userId !== state.currentUser.userId);
-    state.currentUser = null;
-  }
-  saveState();
-  closeModal();
-  renderAccountTab();
-  showToast('계정 탈퇴가 완료되었습니다.');
-}
-
-function updateHeaderPill() {
-  const pill = document.getElementById('headerUserPill');
-  pill.textContent = state.currentUser ? state.currentUser.nickname : '게스트';
-}
-
-function copyText(txt) {
-  if (navigator.clipboard) navigator.clipboard.writeText(txt).catch(() => {});
-  showToast(`초대 코드 [${txt}] 복사 완료.`);
-}
-
-function openModal(html) {
-  document.getElementById('modalContent').innerHTML = html;
-  document.getElementById('modalBackdrop').classList.add('open');
-}
-function closeModal() {
-  document.getElementById('modalBackdrop').classList.remove('open');
-}
-
-function escapeHtml(str) {
-  return String(str || '').replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
-}
-
-// Init
-(function init() {
-  loadState();
-  const today = new Date().toISOString().slice(0, 10);
-  const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
-  const startInp = document.getElementById('inpStart');
-  const endInp = document.getElementById('inpEnd');
-  startInp.value = today;
-  endInp.value = tomorrow;
-  endInp.min = today;
-  updateHeaderPill();
-  renderRouteTab();
-  window._splashTimer = setTimeout(() => {
-    document.getElementById('splash').classList.add('hide');
-  }, 2150);
-})();
-</script>
+    window.addEventListener("DOMContentLoaded", initApp);
+  </script>
 </body>
 </html>
