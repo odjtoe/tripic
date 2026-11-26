@@ -575,6 +575,32 @@
       box-shadow: 0 0 0 3px rgba(0, 230, 138, 0.25);
     }
 
+    /* Inline Route Map Card above DAY selector */
+    .inline-map-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 12px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .inline-map-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      padding: 0 2px;
+    }
+
+    #routeCanvas {
+      width: 100%;
+      height: 210px;
+      border-radius: 12px;
+      background: #EEF4EF;
+      display: block;
+    }
+
     /* Toolbar & Day Tabs */
     .toolbar {
       display: flex;
@@ -611,30 +637,6 @@
       background: var(--sage);
       color: var(--green);
       border-color: var(--green);
-    }
-
-    .view-toggle {
-      display: flex;
-      background: var(--sage);
-      padding: 3px;
-      border-radius: 10px;
-      flex-shrink: 0;
-    }
-
-    .view-btn {
-      border: none;
-      background: transparent;
-      padding: 5px 10px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--green);
-      cursor: pointer;
-    }
-
-    .view-btn.active {
-      background: #fff;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
     }
 
     /* Stop Cards */
@@ -755,23 +757,6 @@
       color: var(--danger);
       background: #FFF6F6;
       border-color: #F6D6D6;
-    }
-
-    /* Map Canvas */
-    .map-box {
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 12px;
-      margin-bottom: 12px;
-    }
-
-    #routeCanvas {
-      width: 100%;
-      height: 290px;
-      border-radius: 12px;
-      background: #EEF4EF;
-      display: block;
     }
 
     /* Forms & Inputs */
@@ -1282,7 +1267,7 @@
       margin-top: 10px;
     }
 
-    /* Bottom Navigation */
+    /* Bottom Navigation (3 Tabs) */
     nav.bottom-nav {
       position: fixed;
       bottom: 0;
@@ -1292,7 +1277,7 @@
       backdrop-filter: blur(10px);
       border-top: 1px solid var(--border);
       display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       padding: 8px 2px 12px;
       z-index: 50;
     }
@@ -1565,17 +1550,11 @@
         </div>
       </section>
 
-      <!-- TAB 3: 지도·루트 -->
-      <section id="tab-map" class="tab-panel"></section>
-
-      <!-- TAB 4: 동행·공유 -->
-      <section id="tab-share" class="tab-panel"></section>
-
-      <!-- TAB 5: 내 계정 -->
+      <!-- TAB 3: 내 계정 -->
       <section id="tab-account" class="tab-panel"></section>
     </main>
 
-    <!-- Bottom Navigation -->
+    <!-- Bottom Navigation (3 Tabs) -->
     <nav class="bottom-nav">
       <button type="button" class="nav-item active" data-tab="route" onclick="switchTab('route')">
         <span class="nav-ico">
@@ -1597,26 +1576,6 @@
           </svg>
         </span>
         <span>새 여행</span>
-      </button>
-      <button type="button" class="nav-item" data-tab="map" onclick="switchTab('map')">
-        <span class="nav-ico">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="9"/>
-            <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
-          </svg>
-        </span>
-        <span>지도·루트</span>
-      </button>
-      <button type="button" class="nav-item" data-tab="share" onclick="switchTab('share')">
-        <span class="nav-ico">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-            <circle cx="9" cy="7" r="4"/>
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-          </svg>
-        </span>
-        <span>동행·공유</span>
       </button>
       <button type="button" class="nav-item" data-tab="account" onclick="switchTab('account')">
         <span class="nav-ico">
@@ -1698,9 +1657,7 @@
       pin: `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6-5.35-6-10a6 6 0 0 1 12 0c0 4.65-6 10-6 10z"/><circle cx="12" cy="11" r="2.2"/></svg>`,
       pinSm: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6-5.35-6-10a6 6 0 0 1 12 0c0 4.65-6 10-6 10z"/><circle cx="12" cy="11" r="2.2"/></svg>`,
       checkSm: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
-      folder: `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>`,
       user: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="8" r="4"/></svg>`,
-      users: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
       bell: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>`,
       cloud: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>`
     };
@@ -2921,8 +2878,6 @@
       const activeBtn = document.querySelector('.nav-item.active');
       const tab = activeBtn ? activeBtn.getAttribute('data-tab') : 'route';
       if (tab === 'route') renderRouteTab();
-      else if (tab === 'map') renderMapTab();
-      else if (tab === 'share') renderShareTab();
       else if (tab === 'account') renderAccountTab();
     }
 
@@ -2935,8 +2890,6 @@
       if (targetNav) targetNav.classList.add('active');
       if (tab === 'route') renderRouteTab();
       if (tab === 'create') resetCreateFormInputs();
-      if (tab === 'map') renderMapTab();
-      if (tab === 'share') renderShareTab();
       if (tab === 'account') renderAccountTab();
     }
 
@@ -3242,7 +3195,7 @@
       `;
     }
 
-    /* TAB 1: 내 일정 */
+    /* TAB 1: 내 일정 (DAY 선택 박스 바로 위 동선 지도 포함) */
     function renderRouteTab() {
       const container = document.getElementById('tab-route');
       const trip = getActiveTrip();
@@ -3308,6 +3261,16 @@
         </div>
       `;
 
+      const mapBoxHtml = `
+        <div class="inline-map-card">
+          <div class="inline-map-header">
+            <span style="font-size:12.5px;font-weight:800;color:var(--green);">DAY ${state.activeDay} 이동 동선 지도</span>
+            <span style="font-size:11.5px;color:var(--muted);">총 ${stops.length}개 경유지</span>
+          </div>
+          <canvas id="routeCanvas" width="760" height="420"></canvas>
+        </div>
+      `;
+
       const toolbarHtml = `
         <div class="toolbar">
           <div class="day-tabs">
@@ -3315,7 +3278,7 @@
               <button type="button" class="day-tab ${d === state.activeDay ? 'active' : ''}" onclick="selectDay(${d})">DAY ${d}</button>
             `).join('')}
           </div>
-          <button type="button" class="btn btn-sage btn-sm" onclick="switchTab('map')">지도·루트 보기</button>
+          ${editable ? `<button type="button" class="btn btn-primary btn-sm" onclick="openAddStopModal()">+ 장소 추가</button>` : ''}
         </div>
       `;
 
@@ -3363,148 +3326,8 @@
         `;
       }
 
-      container.innerHTML = buildTripSwitcherHtml(trip) + bannerHtml + toolbarHtml + bodyHtml;
-    }
-
-    /* TAB 3: 지도·루트 */
-    function renderMapTab() {
-      const container = document.getElementById('tab-map');
-      const trip = getActiveTrip();
-
-      if (!trip) {
-        container.innerHTML = `
-          <div class="empty-box">
-            <div class="empty-icon">${ICONS.pin}</div>
-            <div class="empty-title">표시할 여행 루트가 없어요</div>
-            <div class="empty-desc">먼저 새 여행 일정을 만들면 일차별 이동 동선과 지도를 한눈에 볼 수 있습니다.</div>
-            <div class="empty-btns">
-              <button type="button" class="btn btn-primary" onclick="setCreateMode('manual'); switchTab('create')">새 여행 일정 만들기</button>
-            </div>
-          </div>
-        `;
-        return;
-      }
-
-      normalizeTripOwnership(trip);
-      const editable = canEditTrip(trip);
-      const dayKeys = Object.keys(trip.days).map(Number).sort((a, b) => a - b);
-      if (!dayKeys.includes(state.activeDay)) state.activeDay = dayKeys[0] || 1;
-      const stops = trip.days[state.activeDay] || [];
-
-      container.innerHTML = `
-        ${buildTripSwitcherHtml(trip)}
-        <div class="card" style="padding:14px 16px;margin-bottom:12px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;">
-            <div>
-              <div style="font-size:12px;font-weight:700;color:var(--green);">${escapeHtml(trip.city)}</div>
-              <div style="font-size:16px;font-weight:800;">${escapeHtml(trip.title)} · 동선 지도</div>
-            </div>
-            ${editable ? `<button type="button" class="btn btn-primary btn-sm" onclick="openAddStopModal()">+ 경유지 추가</button>` : ''}
-          </div>
-          <div class="day-tabs">
-            ${dayKeys.map(d => `
-              <button type="button" class="day-tab ${d === state.activeDay ? 'active' : ''}" onclick="selectDay(${d})">DAY ${d}</button>
-            `).join('')}
-          </div>
-        </div>
-
-        <div class="map-box">
-          <canvas id="routeCanvas" width="760" height="520"></canvas>
-          <div style="font-size:12px;color:var(--muted);margin-top:8px;text-align:center;">
-            DAY ${state.activeDay} 동선 시각화 · 총 ${stops.length}개 경유지
-          </div>
-        </div>
-
-        ${stops.length ? `
-          <div class="card" style="padding:14px;">
-            <div style="font-size:13.5px;font-weight:800;margin-bottom:10px;color:var(--green);">DAY ${state.activeDay} 경유 순서</div>
-            ${stops.map((s, idx) => `
-              <div style="display:flex;align-items:center;gap:10px;padding:8px 0;${idx < stops.length - 1 ? 'border-bottom:1px solid var(--border);' : ''}">
-                <div class="stop-num" style="width:23px;height:23px;font-size:11px;">${idx + 1}</div>
-                <div style="flex:1;min-width:0;">
-                  <div style="font-size:13.5px;font-weight:800;">${escapeHtml(s.name)}</div>
-                  <div style="font-size:11.5px;color:var(--muted);">${escapeHtml(s.time)} · ${escapeHtml(s.address || s.cat)}</div>
-                </div>
-                <button type="button" class="mini-act" style="flex:none;padding:6px 10px;" onclick="openDetailModal(${idx})">상세</button>
-              </div>
-            `).join('')}
-          </div>
-        ` : ''}
-      `;
-
+      container.innerHTML = buildTripSwitcherHtml(trip) + bannerHtml + mapBoxHtml + toolbarHtml + bodyHtml;
       drawRouteCanvas(stops, trip.city);
-    }
-
-    /* TAB 4: 동행·공유 */
-    function renderShareTab() {
-      const el = document.getElementById('tab-share');
-      const trip = getActiveTrip();
-      const myCode = getMyCode();
-
-      el.innerHTML = `
-        <div class="card">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-            <div class="empty-icon" style="width:42px;height:42px;border-radius:13px;margin:0;">${ICONS.users}</div>
-            <div>
-              <div style="font-size:16px;font-weight:800;">동행자 실시간 초대 · 공유</div>
-              <div style="font-size:12px;color:var(--muted);">초대된 동행자만 일정 편집 권한이 부여됩니다.</div>
-            </div>
-          </div>
-
-          <div class="code-box">
-            <div style="font-size:12px;font-weight:700;color:var(--green);">내 4자리 동행 초대 코드</div>
-            <div class="code-val">${myCode}</div>
-            <div style="display:flex;gap:8px;justify-content:center;margin-top:6px;">
-              <button type="button" class="btn btn-primary btn-sm" onclick="copyText('${myCode}')">코드 복사하기</button>
-              <button type="button" class="btn btn-outline btn-sm" onclick="openJoinModal()">초대 코드로 합류</button>
-            </div>
-          </div>
-
-          ${trip ? `
-            <div style="background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:13px;margin-top:10px;">
-              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;">
-                <div>
-                  <div style="font-size:11.5px;font-weight:700;color:var(--green);">현재 선택된 일정</div>
-                  <div style="font-size:15px;font-weight:800;">${escapeHtml(trip.title)}</div>
-                </div>
-                ${canEditTrip(trip) ? `<button type="button" class="btn btn-primary btn-sm" onclick="openInviteModal()">+ 친구 초대</button>` : ''}
-              </div>
-              <div style="display:flex;flex-wrap:wrap;gap:6px;">
-                ${trip.members.map(m => `<span class="choice-chip selected" style="font-size:12px;padding:5px 10px;">${escapeHtml(m)}</span>`).join('')}
-              </div>
-            </div>
-          ` : `
-            <div style="font-size:13px;color:var(--muted);text-align:center;padding:10px 0;">
-              활성화된 여행 일정이 없습니다. 새 일정을 만들거나 초대 코드로 합류해 보세요.
-            </div>
-          `}
-        </div>
-
-        <div style="display:flex;justify-content:space-between;align-items:center;margin:14px 0 10px;">
-          <h3 style="font-size:16px;font-weight:800;">내 여행 보관함 (${state.trips.length})</h3>
-          <button type="button" class="btn btn-primary btn-sm" onclick="setCreateMode('manual'); switchTab('create')">+ 새 일정</button>
-        </div>
-        ${state.trips.length === 0 ? `
-          <div class="card" style="text-align:center;padding:24px 16px;color:var(--muted);font-size:13px;">
-            저장된 여행 일정이 아직 없습니다.
-          </div>
-        ` : state.trips.map(t => {
-          const editable = canEditTrip(t);
-          return `
-            <div class="saved-card ${t.id === state.activeTripId ? 'current' : ''}">
-              ${t.id === state.activeTripId ? '<span class="badge-now">현재 보는 일정</span>' : ''}
-              <div style="font-size:12px;color:var(--green);font-weight:700;">${escapeHtml(t.city)} · ${Object.keys(t.days).length}일 코스</div>
-              <div style="font-size:16px;font-weight:800;margin:4px 0;">${escapeHtml(t.title)}</div>
-              <div style="font-size:12.5px;color:var(--muted);margin-bottom:12px;">${escapeHtml(t.start)} ~ ${escapeHtml(t.end)} · 동행 ${t.members.length}명</div>
-              <div style="display:flex;gap:7px;">
-                <button type="button" class="btn btn-primary btn-sm" style="flex:1;" onclick="selectTrip('${t.id}'); switchTab('route')">일정 열기</button>
-                ${editable ? `<button type="button" class="btn btn-sage btn-sm" onclick="openRenameModal('${t.id}')">이름 변경</button>` : ''}
-                <button type="button" class="btn btn-danger btn-sm" onclick="confirmDeleteTrip('${t.id}')">${editable ? '삭제' : '목록 제거'}</button>
-              </div>
-            </div>
-          `;
-        }).join('')}
-      `;
     }
 
     function selectTrip(id) {
@@ -4032,12 +3855,12 @@
         }
 
         ctx.fillStyle = 'rgba(49, 92, 76, 0.14)';
-        ctx.font = '800 34px sans-serif';
-        ctx.fillText(city + ' MAP', 26, 48);
+        ctx.font = '800 32px sans-serif';
+        ctx.fillText(city + ' MAP', 26, 46);
 
         if (!stops.length) {
           ctx.fillStyle = '#315C4C';
-          ctx.font = '700 22px sans-serif';
+          ctx.font = '700 21px sans-serif';
           ctx.textAlign = 'center';
           ctx.fillText('장소를 추가하면 이동 경로가 지도에 표시됩니다', W / 2, H / 2);
           ctx.textAlign = 'left';
@@ -4063,12 +3886,12 @@
             const ny = 1 - (s.lat - minLat) / latSpan;
             return {
               x: 130 + nx * (W - 260),
-              y: 110 + ny * (H - 220)
+              y: 95 + ny * (H - 190)
             };
           }
           const t = stops.length === 1 ? 0.5 : i / (stops.length - 1);
           const x = 110 + t * (W - 220);
-          const y = H * 0.5 + Math.sin(i * 1.45) * 105;
+          const y = H * 0.5 + Math.sin(i * 1.45) * 85;
           return { x, y };
         });
 
@@ -4084,27 +3907,27 @@
         pts.forEach((p, i) => {
           ctx.fillStyle = i === pts.length - 1 ? '#00B86B' : '#315C4C';
           ctx.beginPath();
-          ctx.arc(p.x, p.y, 22, 0, Math.PI * 2);
+          ctx.arc(p.x, p.y, 20, 0, Math.PI * 2);
           ctx.fill();
           ctx.strokeStyle = '#FFFFFF';
           ctx.lineWidth = 4;
           ctx.stroke();
 
           ctx.fillStyle = '#FFFFFF';
-          ctx.font = '800 18px sans-serif';
+          ctx.font = '800 17px sans-serif';
           ctx.textAlign = 'center';
           ctx.fillText(String(i + 1), p.x, p.y + 6);
 
           const label = stops[i].name.length > 11 ? stops[i].name.slice(0, 11) + '…' : stops[i].name;
-          ctx.font = '700 16px sans-serif';
-          const tw = ctx.measureText(label).width + 24;
-          const ly = p.y > H * 0.55 ? p.y - 52 : p.y + 32;
+          ctx.font = '700 15px sans-serif';
+          const tw = ctx.measureText(label).width + 22;
+          const ly = p.y > H * 0.55 ? p.y - 48 : p.y + 28;
           ctx.fillStyle = '#FFFFFF';
           ctx.beginPath();
-          ctx.roundRect(p.x - tw / 2, ly, tw, 30, 10);
+          ctx.roundRect(p.x - tw / 2, ly, tw, 28, 9);
           ctx.fill();
           ctx.fillStyle = '#1E2421';
-          ctx.fillText(label, p.x, ly + 20);
+          ctx.fillText(label, p.x, ly + 19);
         });
         ctx.textAlign = 'left';
       }, 20);
@@ -4415,6 +4238,36 @@
         </div>
       `;
 
+      const savedTripsHtml = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin:14px 0 10px;">
+          <h3 style="font-size:16px;font-weight:800;">내 여행 보관함 (${state.trips.length})</h3>
+          <div style="display:flex;gap:6px;">
+            <button type="button" class="btn btn-outline btn-sm" onclick="openJoinModal()">코드 합류</button>
+            <button type="button" class="btn btn-primary btn-sm" onclick="setCreateMode('manual'); switchTab('create')">+ 새 일정</button>
+          </div>
+        </div>
+        ${state.trips.length === 0 ? `
+          <div class="card" style="text-align:center;padding:24px 16px;color:var(--muted);font-size:13px;">
+            저장된 여행 일정이 아직 없습니다.
+          </div>
+        ` : state.trips.map(t => {
+          const editable = canEditTrip(t);
+          return `
+            <div class="saved-card ${t.id === state.activeTripId ? 'current' : ''}">
+              ${t.id === state.activeTripId ? '<span class="badge-now">현재 보는 일정</span>' : ''}
+              <div style="font-size:12px;color:var(--green);font-weight:700;">${escapeHtml(t.city)} · ${Object.keys(t.days).length}일 코스</div>
+              <div style="font-size:16px;font-weight:800;margin:4px 0;">${escapeHtml(t.title)}</div>
+              <div style="font-size:12.5px;color:var(--muted);margin-bottom:12px;">${escapeHtml(t.start)} ~ ${escapeHtml(t.end)} · 동행 ${t.members.length}명</div>
+              <div style="display:flex;gap:7px;">
+                <button type="button" class="btn btn-primary btn-sm" style="flex:1;" onclick="selectTrip('${t.id}'); switchTab('route')">일정 열기</button>
+                ${editable ? `<button type="button" class="btn btn-sage btn-sm" onclick="openRenameModal('${t.id}')">이름 변경</button>` : ''}
+                <button type="button" class="btn btn-danger btn-sm" onclick="confirmDeleteTrip('${t.id}')">${editable ? '삭제' : '목록 제거'}</button>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      `;
+
       if (state.currentUser) {
         const u = state.currentUser;
         el.innerHTML = `
@@ -4443,6 +4296,7 @@
               <button type="button" class="btn btn-danger" onclick="confirmDeleteAccount()">계정 탈퇴</button>
             </div>
           </div>
+          ${savedTripsHtml}
           ${supabaseCardHtml}
         `;
         return;
@@ -4488,6 +4342,7 @@
             </div>
           </div>
         </div>
+        ${savedTripsHtml}
         ${supabaseCardHtml}
       `;
     }
